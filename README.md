@@ -15,6 +15,13 @@ Home Assistant via MQTT discovery.
   ADC range
 - Stripboard construction, with high-voltage components physically grouped
   and separated from the low-voltage ESP32-C3/signal-conditioning section
+  
+## Documentation
+
+- [Schematic](hardware/schematic/ac_monitor_schematic.pdf)
+- [Stripboard layout](hardware/stripboard/ac_monitor_stripboard.pdf)
+- [Parts list](parts_list.md)
+- [Build photos](hardware/photos/)
 
 ### Pin assignments
 
