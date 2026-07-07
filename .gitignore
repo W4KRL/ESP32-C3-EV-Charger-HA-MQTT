@@ -1,0 +1,10 @@
+secrets.h
+
+# Arduino IDE build artifacts (if ever generated in-folder)
+build/
+*.hex
+*.bin
+
+# OS clutter
+.DS_Store
+Thumbs.db
