@@ -17,14 +17,19 @@
  * see the Calibration section for the bench procedure.
  *
  * @author Karl Berger with Claude
- * @date 2026.07.07
+ * @date 2026.07.08
  */
 
 #pragma once
 
 #include "secrets.h"  // WIFI_SSID, WIFI_PASS, MQTT_HOST, MQTT_USER, MQTT_PASS, OTA_PASSWORD
 
-static const char* FW_VERSION = "1.0.1";  // bump on each release
+static const char* FW_VERSION = "1.0.4";  // bump on each release
+// 1.0.0 2026.07.06 initial commit
+// 1.0.1 2026.07.06
+// 1.0.2 2026.07.07 rescaled CURRENT_SCALE due to error in windings
+// 1.0.3 2026.07.08 added state_class to SensorDef for rssi
+// 1.0.4 2026.07.08 returnd CURRENT_SCALE=0.03456f for 4-turns
 
 // ─── MQTT ─────────────────────────────────────────────────────────────────────
 #define MQTT_CLIENT_ID "ac_monitor_01"
@@ -77,7 +82,7 @@ static const float CURRENT_SCALE = 0.03456f;  // ← MUST calibrate before use
 //   4. VOLTAGE_SCALE = DMM_Vrms / vrms_mv
 //   5. CURRENT_SCALE = DMM_Irms / irms_mv
 
-// ─── Data Types ──────────────────────────────────────────
+// ─── Data Types ───────────────────────────────────────────────────────────────
 // AC power measurement – updated by measure(), published by publishReading()
 struct PowerReading {
   float vrms;       // RMS voltage (V)
@@ -89,7 +94,7 @@ struct PowerReading {
 
 inline PowerReading reading;  // single global instance — defined here, used everywhere config.h is included
 
-// ─── secrets.h template ────────────────────────────────────────────────────
+// ─── secrets.h template ───────────────────────────────────────────────────────
 /**
  * @brief Template for secrets.h — create this file locally; do not commit it.
  *

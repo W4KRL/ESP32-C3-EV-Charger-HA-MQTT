@@ -9,7 +9,7 @@
  * Home Assistant MQTT discovery registration for all sensor entities.
  *
  * @author Karl Berger with Claude
- * @date 2026.07.06
+ * @date 2026.07.08
  */
 
 #include "mqttConnection.h"  // self-header
@@ -52,24 +52,25 @@ void publishReading() {
 }  // publishReading()
 
 void publishDiscovery() {
-  struct SensorDef {
-    const char* name;
-    const char* id;
-    const char* unit;
-    const char* deviceClass;
-    const char* icon;
-    const char* category;
-  };
+struct SensorDef {
+  const char* name;
+  const char* id;
+  const char* unit;
+  const char* deviceClass;
+  const char* icon;
+  const char* category;
+  const char* stateClass;
+};
 
-  static const SensorDef sensors[] = {
-    { "AC Voltage",       "vrms",  "V",   "voltage",         nullptr,         nullptr },
-    { "AC Current",       "irms",  "A",   "current",         nullptr,         nullptr },
-    { "Real Power",       "watts", "W",   "power",           nullptr,         nullptr },
-    { "Apparent Power",   "va",    "VA",  nullptr,           "mdi:sine-wave", nullptr },
-    { "Power Factor",     "pf",    "",    "power_factor",    nullptr,         nullptr },
-    { "RSSI",             "rssi",  "dBm", "signal_strength", nullptr,         "diagnostic" },
-    { "Firmware Version", "fw",    "",    nullptr,           "mdi:chip",      "diagnostic" },
-  };
+static const SensorDef sensors[] = {
+  { "AC Voltage",       "vrms",  "V",   "voltage",         nullptr,         nullptr,      "measurement" },
+  { "AC Current",       "irms",  "A",   "current",         nullptr,         nullptr,      "measurement" },
+  { "Real Power",       "watts", "W",   "power",           nullptr,         nullptr,      "measurement" },
+  { "Apparent Power",   "va",    "VA",  nullptr,           "mdi:sine-wave", nullptr,      "measurement" },
+  { "Power Factor",     "pf",    "",    "power_factor",    nullptr,         nullptr,      "measurement" },
+  { "RSSI",             "rssi",  "dBm", "signal_strength", nullptr,         "diagnostic", "measurement" },
+  { "Firmware Version", "fw",    "",    nullptr,           "mdi:chip",      "diagnostic", nullptr },
+};
 
   Serial.printf("Buffer size: %d, Max packet: %d\n", mqtt.getBufferSize(), MQTT_MAX_PACKET_SIZE);  // ← add this line here, before the loop
 
@@ -88,6 +89,7 @@ void publishDiscovery() {
     if (s.deviceClass) doc["device_class"] = s.deviceClass;
     if (s.icon) doc["icon"] = s.icon;
     if (s.category) doc["entity_category"] = s.category;
+    if (s.stateClass) doc["state_class"] = s.stateClass;
     doc["availability_topic"] = MQTT_TOPIC_STATUS;
     doc["payload_available"] = "online";
     doc["payload_not_available"] = "offline";
