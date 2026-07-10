@@ -20,20 +20,21 @@
  * @author Karl Berger with Claude
  * @date 2026.07.10
  */
- 
+
 #pragma once
 
 #include <Arduino.h>
-
+// clang-format off
 enum LedState : uint8_t {
-  LED_OFF = 0,           // No powewr
+  LED_OFF =          0,  // No power
   LED_GREEN_STEADY = 1,  // Normal operation (idle)
-  LED_GREEN_SLOW = 2,    // Charging active
-  LED_GREEN_FAST = 3,    // Connecting to Wi-Fi
-  LED_RED_STEADY = 4,    // Not used
-  LED_RED_SLOW = 5,      // CALIBRATE mode
-  LED_RED_FAST = 6       // Wi-Fi or MQTT connection failure
+  LED_GREEN_SLOW =   2,  // Charging active
+  LED_GREEN_FAST =   3,  // Connecting to Wi-Fi
+  LED_RED_STEADY =   4,  // Not used
+  LED_RED_SLOW =     5,  // CALIBRATE mode
+  LED_RED_FAST =     6   // Wi-Fi or MQTT connection failure
 };
+// clang-format on
 
 void initBicolorLed();                   // Set pinModes
 void setBicolorLedState(uint8_t state);  // Pass alert state
