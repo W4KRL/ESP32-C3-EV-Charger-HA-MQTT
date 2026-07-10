@@ -12,5 +12,5 @@
 
 #pragma once
 
-void wifiConnect();  // connect to local Wi-Fi
-void initOTA();      // establish Over The Air update service
+bool wifiConnect();  // Connect to local Wi-Fi
+void initOTA();      // Establish Over The Air update service

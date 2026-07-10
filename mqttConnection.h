@@ -25,6 +25,6 @@
 
 extern PubSubClient mqtt;     // MQTT client instance defined in mqttConnection.cpp
 
-void mqttConnect();       // connect to MQTT broker
+bool mqttConnect();       // connect to MQTT broker
 void publishReading();    // publishes global reading to MQTT broker
 void publishDiscovery();  // publishes HA MQTT auto-discovery config topics

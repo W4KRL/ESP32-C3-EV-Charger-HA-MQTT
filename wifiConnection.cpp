@@ -9,23 +9,41 @@
  * for serial-visible OTA status during firmware updates.
  *
  * @author Karl Berger with Claude
- * @date 2026.06.26
+ * @date 2026.07.09
  */
 
-#include "wifiConnection.h"  // self header
-#include "config.h"          // credentials
+#include "wifiConnection.h"  // Self header
+#include "config.h"          // Credentials
 #include <WiFi.h>            // Wi-Fi library
 #include <ArduinoOTA.h>      // OTA library
+#include "alertFlash.h"      // Mode indications
 
-void wifiConnect() {
+/**
+ * @brief Connect to WiFi with a bounded timeout.
+ * @return true if connected, false if timed out.
+ * @warning Blocking. Caller must decide retry/reboot behavior on failure.
+ */
+bool wifiConnect() {
+  setBicolorLedState(LED_GREEN_FAST);
+
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
   Serial.print("WiFi connecting");
+
+  unsigned long startAttempt = millis();
   while (WiFi.status() != WL_CONNECTED) {
+    if (millis() - startAttempt >= WIFI_CONNECT_TIMEOUT_MS) {
+      setBicolorLedState(LED_RED_FAST);
+      Serial.println("\nWiFi connect timed out");
+      return false;
+    }
+    updateBicolorLed();  // keep flash alive during blocking wait
     delay(500);
     Serial.print(".");
   }
+
   Serial.printf("\nConnected — IP: %s\n", WiFi.localIP().toString().c_str());
+  return true;
 }  // wifiConnect()
 
 void initOTA() {

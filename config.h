@@ -17,46 +17,55 @@
  * see the Calibration section for the bench procedure.
  *
  * @author Karl Berger with Claude
- * @date 2026.07.08
+ * @date 2026.07.10
  */
 
 #pragma once
 
 #include "secrets.h"  // WIFI_SSID, WIFI_PASS, MQTT_HOST, MQTT_USER, MQTT_PASS, OTA_PASSWORD
 
-static const char* FW_VERSION = "1.0.4";  // bump on each release
+static const char* FW_VERSION = "1.0.6";  // bump on each release
 // 1.0.0 2026.07.06 initial commit
 // 1.0.1 2026.07.06
 // 1.0.2 2026.07.07 rescaled CURRENT_SCALE due to error in windings
 // 1.0.3 2026.07.08 added state_class to SensorDef for rssi
 // 1.0.4 2026.07.08 returnd CURRENT_SCALE=0.03456f for 4-turns
+// 1.0.5 2026.07.09 add LED mode indications
+// 1.0.6 2026.07.10 moved measure() to measurement module
+
+// --- Wi-Fi Timeout ------------------------------------------------------------
+static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000;  // 15 s WiFi connect timeout
 
 // ─── MQTT ─────────────────────────────────────────────────────────────────────
 #define MQTT_CLIENT_ID "ac_monitor_01"
 #define MQTT_TOPIC_POWER "home/power/ac_monitor/state"
 #define MQTT_TOPIC_STATUS "home/power/ac_monitor/status"
-static const int MQTT_PORT = 1883;
+static constexpr int MQTT_PORT = 1883;
+static constexpr unsigned long MQTT_CONNECT_TIMEOUT_MS = 15000;  // 15 s MQTT connect timeout
+static const int MQTT_KEEPALIVE_S = 60;                          // seconds between activity pings
 
 // ─── OTA ──────────────────────────────────────────────────────────────────────
-#define OTA_HOSTNAME "ac-monitor-01"
+#define OTA_HOSTNAME "ota-monitor-01"
 
-// ─── Power Line ───────────────────────────────────────────────────────────────
-static const float LINE_FREQUENCY = 60.0f;  // Hz – use local utility frequency
-static const int SAMPLE_CYCLES = 50;        // number of cycles per measurement burst (~833ms @ 60 Hz)
-static const int SAMPLE_INTERVAL_US = 400;  // microseconds between ADC samples (~2500 samples/sec, 41/cycle)
+// ─── Electrical Parameters ────────────────────────────────────────────────────
+static constexpr float LINE_FREQUENCY = 60.0f;  // Hz – use local utility frequency
+static constexpr int SAMPLE_CYCLES = 50;        // number of cycles per measurement burst (~833ms @ 60 Hz)
+static constexpr int SAMPLE_INTERVAL_US = 400;  // microseconds between ADC samples (~2500 samples/sec, 41/cycle)
 
 // ─── Adaptive reporting ───────────────────────────────────────────────────────
-static const float LOAD_THRESHOLD_A = 1.0f;                       // amps — switches report interval
-static const unsigned long IDLE_INTERVAL_MS = 2UL * 60 * 1000;    // 2 min when I < threshold
-static const unsigned long ACTIVE_INTERVAL_MS = 1UL * 30 * 1000;  // 30 sec when I >= threshold
-static const float CURRENT_DEADBAND_A = 0.2f;                     // below this, treat current/power as zero
+static constexpr float LOAD_THRESHOLD_A = 1.0f;                       // amps — switches report interval
+static constexpr unsigned long IDLE_INTERVAL_MS = 10UL * 60 * 1000;   // 10 min when I < threshold
+static constexpr unsigned long ACTIVE_INTERVAL_MS = 1UL * 60 * 1000;  // 60 sec when I >= threshold
+static constexpr float CURRENT_DEADBAND_A = 0.2f;                     // below this, treat current/power as zero
 
 // ─── Device Connections ───────────────────────────────────────────────────────
-static const int PIN_VOLTAGE = 0;  // ADC1_CH3
-static const int PIN_CURRENT = 3;  // ADC1_CH0
+static constexpr int PIN_VOLTAGE = 0;    // ADC1_CH0
+static constexpr int PIN_CURRENT = 3;    // ADC1_CH3
+static constexpr int PIN_LED_RED = 5;    // GPIO5 bicolor LED
+static constexpr int PIN_LED_GREEN = 6;  // GPIO6 bicolor LED
 
 // ─── Calibration ──────────────────────────────────────────────────────────────
-//#define CALIBRATE  // uncomment for calibration
+// #define CALIBRATE  // uncomment for calibration
 const unsigned long CAL_INTERVAL_MS = 10000;
 static const float VOLTAGE_SCALE = 1.0f;      // ← MUST calibrate before use
 static const float CURRENT_SCALE = 0.03456f;  // ← MUST calibrate before use

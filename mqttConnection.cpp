@@ -12,27 +12,48 @@
  * @date 2026.07.08
  */
 
-#include "mqttConnection.h"  // self-header
-#include "config.h"          // credentials and parameters
+#include "mqttConnection.h"  // Self-header
+#include "config.h"          // Credentials and parameters
 #include <WiFi.h>            // Wi-Fi library
-#include <ArduinoJson.h>     // json library
+#include <ArduinoJson.h>     // JSON library
+#include "alertFlash.h"      // Mode indications
 
 WiFiClient wifiClient;
 PubSubClient mqtt(wifiClient);
 
-void mqttConnect() {
+/**
+ * @brief Connect to MQTT broker and register discovery, with bounded retry.
+ * @return true if connected and discovery published, false if timed out.
+ * @warning Blocking. Caller must decide retry/reboot behavior on failure.
+ */
+bool mqttConnect() {
+  unsigned long startAttempt = millis();
+
   while (!mqtt.connected()) {
+    if (millis() - startAttempt >= MQTT_CONNECT_TIMEOUT_MS) {
+      setBicolorLedState(LED_RED_FAST);
+      Serial.println("MQTT connect timed out");
+      return false;
+    }
+
     Serial.print("MQTT connecting...");
     if (mqtt.connect(MQTT_CLIENT_ID, MQTT_USER, MQTT_PASS,
                      MQTT_TOPIC_STATUS, /*willQoS=*/1, /*willRetain=*/true, "offline")) {
       Serial.println(" connected");
       mqtt.publish(MQTT_TOPIC_STATUS, "online", /*retain=*/true);
       publishDiscovery();  // register sensors with HA on each connection
+      setBicolorLedState(LED_GREEN_STEADY);
+      return true;
     } else {
       Serial.printf(" failed rc=%d, retry 5s\n", mqtt.state());
-      delay(5000);
+      unsigned long retryStart = millis();
+      while (millis() - retryStart < 5000) {
+        updateBicolorLed();  // sustain flash during retry wait
+        delay(100);
+      }
     }
   }
+  return true;  // unreachable, but keeps compiler happy re: all paths returning
 }  // mqttConnect()
 
 void publishReading() {
@@ -52,25 +73,27 @@ void publishReading() {
 }  // publishReading()
 
 void publishDiscovery() {
-struct SensorDef {
-  const char* name;
-  const char* id;
-  const char* unit;
-  const char* deviceClass;
-  const char* icon;
-  const char* category;
-  const char* stateClass;
-};
+  struct SensorDef {
+    const char* name;
+    const char* id;
+    const char* unit;
+    const char* deviceClass;
+    const char* icon;
+    const char* category;
+    const char* stateClass;
+  };
 
+  // clang-format off
 static const SensorDef sensors[] = {
-  { "AC Voltage",       "vrms",  "V",   "voltage",         nullptr,         nullptr,      "measurement" },
-  { "AC Current",       "irms",  "A",   "current",         nullptr,         nullptr,      "measurement" },
-  { "Real Power",       "watts", "W",   "power",           nullptr,         nullptr,      "measurement" },
-  { "Apparent Power",   "va",    "VA",  nullptr,           "mdi:sine-wave", nullptr,      "measurement" },
-  { "Power Factor",     "pf",    "",    "power_factor",    nullptr,         nullptr,      "measurement" },
-  { "RSSI",             "rssi",  "dBm", "signal_strength", nullptr,         "diagnostic", "measurement" },
-  { "Firmware Version", "fw",    "",    nullptr,           "mdi:chip",      "diagnostic", nullptr },
+  { "AC Voltage",       "vrms",  "V",   "voltage",         nullptr,         nullptr,       "measurement" },
+  { "AC Current",       "irms",  "A",   "current",         nullptr,         nullptr,       "measurement" },
+  { "Real Power",       "watts", "W",   "power",           nullptr,         nullptr,       "measurement" },
+  { "Apparent Power",   "va",    "VA",  nullptr,           "mdi:sine-wave", nullptr,       "measurement" },
+  { "Power Factor",     "pf",    "",    "power_factor",    nullptr,         nullptr,       "measurement" },
+  { "RSSI",              "rssi", "dBm", "signal_strength", nullptr,         "diagnostic",  "measurement" },
+  { "Firmware Version", "fw",    "",    nullptr,           "mdi:chip",      "diagnostic",  nullptr },
 };
+  // clang-format on
 
   Serial.printf("Buffer size: %d, Max packet: %d\n", mqtt.getBufferSize(), MQTT_MAX_PACKET_SIZE);  // ← add this line here, before the loop
 

@@ -25,8 +25,8 @@ Home Assistant via MQTT discovery.
 
 ### Pin assignments
 
-| Signal  | Pin  | Notes                                  |
-|---------|------|-----------------------------------------|
+| Signal  | Pin        | Notes                             |
+|---------|------------|-----------------------------------|
 | Voltage | GPIO0 (A0) | ZMPT101B divider output           |
 | Current | GPIO3 (A3) | CT burden/bias node               |
 
@@ -73,11 +73,11 @@ procedure.
 
 ## MQTT Topics
 
-| Topic                              | Purpose                          |
-|-------------------------------------|-----------------------------------|
-| `home/power/ac_monitor/state`       | JSON payload: vrms, irms, watts, va, pf, rssi, fw |
-| `home/power/ac_monitor/status`      | `online` / `offline` (LWT)        |
-| `homeassistant/sensor/ac_monitor_01/.../config` | HA discovery topics    |
+| Topic                                           | Purpose                           |
+|-------------------------------------------------|-----------------------------------|
+| `home/power/ac_monitor/state`                   | JSON payload: vrms, irms, watts, va, pf, rssi, fw |
+| `home/power/ac_monitor/status`                  | `online` / `offline` (LWT)        |
+| `homeassistant/sensor/ac_monitor_01/.../config` | HA discovery topics               |
 
 ## Build
 
