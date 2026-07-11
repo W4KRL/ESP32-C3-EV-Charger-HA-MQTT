@@ -56,7 +56,7 @@ static constexpr int SAMPLE_INTERVAL_US = 400;  // microseconds between ADC samp
 static constexpr float LOAD_THRESHOLD_A = 1.0f;                       // amps — switches report interval
 static constexpr unsigned long IDLE_INTERVAL_MS = 10UL * 60 * 1000;   // 10 min when I < threshold
 static constexpr unsigned long ACTIVE_INTERVAL_MS = 1UL * 60 * 1000;  // 60 sec when I >= threshold
-static constexpr float CURRENT_DEADBAND_A = 0.2f;                     // below this, treat current/power as zero
+static constexpr float CURRENT_DEADBAND_A = 0.3f;                     // below this, treat current/power as zero
 
 // ─── Device Connections ───────────────────────────────────────────────────────
 static constexpr int PIN_VOLTAGE = 0;    // ADC1_CH0
