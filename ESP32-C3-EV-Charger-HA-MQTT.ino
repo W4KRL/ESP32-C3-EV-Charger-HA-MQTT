@@ -36,9 +36,9 @@ void setup() {
   Serial.println("\n=== AC Power Monitor ===");  // Welcome
   initBicolorLed();                              // prepare LED for mode alerts
 
-#ifdef CALIBRATE
+#ifdef CALIBRATE                     // run calibration mode if defined
   setBicolorLedState(LED_RED_SLOW);  // Indicate calibration mode
-#else
+#else                                // else continue with normal start up
   wifiConnect();                             // Connect to local Wi-Fi
   initOTA();                                 // Initialize OTA
   mqtt.setServer(MQTT_HOST, MQTT_PORT);      // Initiaize HA MQTT host
