@@ -9,12 +9,13 @@
  * for serial-visible OTA status during firmware updates.
  *
  * @author Karl Berger with Claude
- * @date 2026.07.09
+ * @date 2026.07.14
  */
 
 #include "wifiConnection.h"  // Self header
 #include "config.h"          // Credentials
 #include <WiFi.h>            // Wi-Fi library
+#include <esp_wifi.h>        // For esp_wifi_get_config/set_config (AP scan/sort settings)
 #include <ArduinoOTA.h>      // OTA library
 #include "alertFlash.h"      // Mode indications
 
@@ -26,8 +27,22 @@
 bool wifiConnect() {
   setBicolorLedState(LED_GREEN_FAST);
 
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  WiFi.mode(WIFI_STA);   // set station mode
+  WiFi.setSleep(false);  // keep the radio active to maintain a stable network connection
+
+  // Set SSID/password without connecting yet, so our scan/sort override
+  // below isn't clobbered by WiFi.begin()'s own internal config write
+  WiFi.begin(WIFI_SSID, WIFI_PASS, 0, nullptr, /*connect=*/false);
+
+  // Force a full-channel scan and RSSI-based AP selection so OneMesh
+  // picks the strongest AP sharing the SSID, not just the first to answer
+  wifi_config_t conf;
+  esp_wifi_get_config(WIFI_IF_STA, &conf);
+  conf.sta.scan_method = WIFI_ALL_CHANNEL_SCAN;
+  conf.sta.sort_method = WIFI_CONNECT_AP_BY_SIGNAL;
+  esp_wifi_set_config(WIFI_IF_STA, &conf);
+
+  esp_wifi_connect();  // now actually connect, with our scan/sort settings intact
   Serial.print("WiFi connecting");
 
   unsigned long startAttempt = millis();
