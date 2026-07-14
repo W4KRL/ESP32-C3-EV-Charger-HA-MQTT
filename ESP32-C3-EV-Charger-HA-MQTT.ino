@@ -70,6 +70,13 @@ void loop() {
   measure();                                         // Read ADC and calculate electrical parameters
   publishReading();                                  // Publish measurements to MQTT
 
+  // Liveness watchdog: catches zombie associations where WiFi.status()
+  // still reports WL_CONNECTED but the link is actually dead
+  if (millis() - lastSuccessfulPublish > MQTT_LIVENESS_TIMEOUT_MS) {
+    WiFi.disconnect();  // tear down the stale association explicitly
+    wifiConnect();      // re-scan and reassociate (picks best RSSI fresh)
+  }
+
   bool isActive = (reading.irms >= LOAD_THRESHOLD_A);
   setBicolorLedState(isActive ? LED_GREEN_SLOW : LED_GREEN_STEADY);
 
