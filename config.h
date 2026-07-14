@@ -24,7 +24,7 @@
 
 #include "secrets.h"  // WIFI_SSID, WIFI_PASS, MQTT_HOST, MQTT_USER, MQTT_PASS, OTA_PASSWORD
 
-static const char* FW_VERSION = "1.0.6";  // bump on each release
+static const char* FW_VERSION = "1.0.7";  // bump on each release
 // 1.0.0 2026.07.06 initial commit
 // 1.0.1 2026.07.06
 // 1.0.2 2026.07.07 rescaled CURRENT_SCALE due to error in windings
@@ -32,6 +32,7 @@ static const char* FW_VERSION = "1.0.6";  // bump on each release
 // 1.0.4 2026.07.08 returnd CURRENT_SCALE=0.03456f for 4-turns
 // 1.0.5 2026.07.09 add LED mode indications
 // 1.0.6 2026.07.10 moved measure() to measurement module
+// 1.0.7 2026.07.14 improve WiFi connection loss response
 
 // --- Wi-Fi Timeout ------------------------------------------------------------
 static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000;  // 15 s WiFi connect timeout
@@ -41,8 +42,10 @@ static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000;  // 15 s WiFi co
 #define MQTT_TOPIC_POWER "home/power/ac_monitor/state"
 #define MQTT_TOPIC_STATUS "home/power/ac_monitor/status"
 static constexpr int MQTT_PORT = 1883;
-static constexpr unsigned long MQTT_CONNECT_TIMEOUT_MS = 15000;  // 15 s MQTT connect timeout
-static const int MQTT_KEEPALIVE_S = 60;                          // seconds between activity pings
+static constexpr unsigned long MQTT_CONNECT_TIMEOUT_MS = 15000;   // 15 s MQTT connect timeout
+static constexpr int MQTT_KEEPALIVE_S = 60;                       // seconds between activity pings
+static constexpr unsigned long MQTT_LIVENESS_TIMEOUT_MS = 90000;  // 3x expected publish interval; tune to your actual publishReading() cadence
+inline unsigned long lastSuccessfulPublish = 0;                   // defined in mqttConnection.cpp. make it global here
 
 // ─── OTA ──────────────────────────────────────────────────────────────────────
 #define OTA_HOSTNAME "ota-monitor-01"
@@ -67,8 +70,8 @@ static constexpr int PIN_LED_GREEN = 6;  // GPIO6 bicolor LED
 // ─── Calibration ──────────────────────────────────────────────────────────────
 // #define CALIBRATE  // uncomment for calibration
 const unsigned long CAL_INTERVAL_MS = 10000;
-static const float VOLTAGE_SCALE = 1.0f;      // ← MUST calibrate before use
-static const float CURRENT_SCALE = 0.03456f;  // ← MUST calibrate before use
+static constexpr float VOLTAGE_SCALE = 1.0f;      // ← MUST calibrate before use
+static constexpr float CURRENT_SCALE = 0.03456f;  // ← MUST calibrate before use
 // analogReadMilliVolts() returns calibrated mV (0–3100 mV at ADC_11db).
 // These scales convert mV-rms at the ADC pin to real-world units.
 //
