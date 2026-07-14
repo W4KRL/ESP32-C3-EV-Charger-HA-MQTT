@@ -9,7 +9,7 @@
  * Home Assistant MQTT discovery registration for all sensor entities.
  *
  * @author Karl Berger with Claude
- * @date 2026.07.08
+ * @date 2026.07.14
  */
 
 #include "mqttConnection.h"  // Self-header
@@ -64,12 +64,20 @@ void publishReading() {
   doc["va"] = serialized(String(reading.apparent, 1));
   doc["pf"] = serialized(String(reading.pf, 3));
   doc["rssi"] = WiFi.RSSI();
+  doc["bssid"] = WiFi.BSSIDstr();
   doc["fw"] = FW_VERSION;
 
   char buf[256];
   serializeJson(doc, buf, sizeof(buf));
-  mqtt.publish(MQTT_TOPIC_POWER, buf);
+
+  bool ok = mqtt.publish(MQTT_TOPIC_POWER, buf);
   Serial.printf("TX: %s\n", buf);
+
+  if (ok) {
+    lastSuccessfulPublish = millis();
+  } else {
+    Serial.println(F("MQTT publish failed"));
+  }
 }  // publishReading()
 
 void publishDiscovery() {
@@ -91,6 +99,7 @@ static const SensorDef sensors[] = {
   { "Apparent Power",   "va",    "VA",  nullptr,           "mdi:sine-wave", nullptr,       "measurement" },
   { "Power Factor",     "pf",    "",    "power_factor",    nullptr,         nullptr,       "measurement" },
   { "RSSI",              "rssi", "dBm", "signal_strength", nullptr,         "diagnostic",  "measurement" },
+  { "WiFi BSSID",       "bssid", "",    nullptr,           "mdi:access-point-network", "diagnostic", nullptr },
   { "Firmware Version", "fw",    "",    nullptr,           "mdi:chip",      "diagnostic",  nullptr },
 };
   // clang-format on
