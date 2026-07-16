@@ -3,14 +3,14 @@
  * @brief Tunable parameters and shared data types for the AC power monitor.
  *
  * @details
- * Centralizes non-sensitive, per-deployment configuration: MQTT topic/client
- * naming, OTA hostname, ADC sampling and adaptive-reporting parameters,
+ * Centralizes non-sensitive credentials, specific build configuration: 
+ * MQTT topic/client naming, OTA hostname, ADC sampling and adaptive-reporting parameters,
  * voltage/current calibration constants (see the Calibration section below
  * for derivation and bench procedure), pin assignments, and the PowerReading
  * struct shared across ac_monitor.ino and mqttConnection.cpp.
  *
  * @warning Wi-Fi, MQTT, and OTA credentials live in secrets.h, which is
- * gitignored and must be created locally from secrets.h.example.
+ * gitignored and must be created locally from secrets.h.example below.
  *
  * @warning VOLTAGE_SCALE and CURRENT_SCALE must be calibrated against a
  * known reference (DMM/clamp meter) before trusting reported values --
@@ -26,10 +26,10 @@
 
 static const char* FW_VERSION = "1.0.7";  // bump on each release
 // 1.0.0 2026.07.06 initial commit
-// 1.0.1 2026.07.06
-// 1.0.2 2026.07.07 rescaled CURRENT_SCALE due to error in windings
+// 1.0.1 2026.07.06 minor cleanup
+// 1.0.2 2026.07.07 rescaled CURRENT_SCALE due to error in CT turns
 // 1.0.3 2026.07.08 added state_class to SensorDef for rssi
-// 1.0.4 2026.07.08 returnd CURRENT_SCALE=0.03456f for 4-turns
+// 1.0.4 2026.07.08 returnd CURRENT_SCALE=0.03456f for CT 4-turns
 // 1.0.5 2026.07.09 add LED mode indications
 // 1.0.6 2026.07.10 moved measure() to measurement module
 // 1.0.7 2026.07.14 improve WiFi connection loss response
@@ -69,7 +69,10 @@ static constexpr int PIN_LED_GREEN = 6;  // GPIO6 bicolor LED
 
 // ─── Calibration ──────────────────────────────────────────────────────────────
 // #define CALIBRATE  // uncomment for calibration
-const unsigned long CAL_INTERVAL_MS = 10000;
+//
+// NOTE: Use CALIBRATE only on a bench top with USB connection to the PC.
+//
+const unsigned long CAL_INTERVAL_MS = 10 * 1000;  // interval between calibration output
 static constexpr float VOLTAGE_SCALE = 1.0f;      // ← MUST calibrate before use
 static constexpr float CURRENT_SCALE = 0.03456f;  // ← MUST calibrate before use
 // analogReadMilliVolts() returns calibrated mV (0–3100 mV at ADC_11db).
