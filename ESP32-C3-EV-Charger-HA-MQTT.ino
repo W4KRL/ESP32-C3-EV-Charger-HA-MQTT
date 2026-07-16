@@ -21,6 +21,7 @@
  * @date 2026.07.10
  */
 
+// ─── Libraries ────────────────────────────────────────────────────────────────
 #include <WiFi.h>            // Built-in
 #include <ArduinoOTA.h>      // Built-in
 #include "config.h"          // Credentials, adjustable parameters and globals
@@ -77,9 +78,9 @@ void loop() {
     wifiConnect();      // re-scan and reassociate (picks best RSSI fresh)
   }
 
+  // adaptive reporting - faster when charging
   bool isActive = (reading.irms >= LOAD_THRESHOLD_A);
   setBicolorLedState(isActive ? LED_GREEN_SLOW : LED_GREEN_STEADY);
-
   long intervalMs = isActive ? ACTIVE_INTERVAL_MS : IDLE_INTERVAL_MS;
   unsigned long wakeAt = millis() + intervalMs;
   while (millis() < wakeAt) {
