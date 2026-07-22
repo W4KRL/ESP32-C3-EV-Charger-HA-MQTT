@@ -44,7 +44,6 @@ static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000;  // 15 s WiFi co
 static constexpr int MQTT_PORT = 1883;
 static constexpr unsigned long MQTT_CONNECT_TIMEOUT_MS = 15000;   // 15 s MQTT connect timeout
 static constexpr int MQTT_KEEPALIVE_S = 60;                       // seconds between activity pings
-static constexpr unsigned long MQTT_LIVENESS_TIMEOUT_MS = 90000;  // 3x expected publish interval; tune to your actual publishReading() cadence
 inline unsigned long lastSuccessfulPublish = 0;                   // defined in mqttConnection.cpp. make it global here
 
 // ─── OTA ──────────────────────────────────────────────────────────────────────
@@ -59,7 +58,8 @@ static constexpr int SAMPLE_INTERVAL_US = 400;  // microseconds between ADC samp
 static constexpr float LOAD_THRESHOLD_A = 1.0f;                       // amps — switches report interval
 static constexpr unsigned long IDLE_INTERVAL_MS = 10UL * 60 * 1000;   // 10 min when I < threshold
 static constexpr unsigned long ACTIVE_INTERVAL_MS = 1UL * 60 * 1000;  // 60 sec when I >= threshold
-static constexpr float CURRENT_DEADBAND_A = 0.3f;                     // below this, treat current/power as zero
+static constexpr unsigned long MQTT_LIVENESS_TIMEOUT_MS = IDLE_INTERVAL_MS + 60UL * 1000;  // must exceed the longest gap between publishes (idle interval), plus a safety margin
+static constexpr float CURRENT_DEADBAND_A = 0.3f;                     // treat current & power as zero to mask noise
 
 // ─── Device Connections ───────────────────────────────────────────────────────
 static constexpr int PIN_VOLTAGE = 0;    // ADC1_CH0
@@ -68,7 +68,7 @@ static constexpr int PIN_LED_RED = 5;    // GPIO5 bicolor LED
 static constexpr int PIN_LED_GREEN = 6;  // GPIO6 bicolor LED
 
 // ─── Calibration ──────────────────────────────────────────────────────────────
-// #define CALIBRATE  // uncomment for calibration
+//  #define CALIBRATE  // uncomment for calibration
 //
 // NOTE: Use CALIBRATE only on a bench top with USB connection to the PC.
 //
