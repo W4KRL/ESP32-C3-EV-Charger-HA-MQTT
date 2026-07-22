@@ -24,11 +24,18 @@
 // ─── Libraries ────────────────────────────────────────────────────────────────
 #include <WiFi.h>            // Built-in
 #include <ArduinoOTA.h>      // Built-in
+#include <TickTwo.h>         // Ticker library by Stefan Staub https://github.com/sstaub/TickTwo
 #include "config.h"          // Credentials, adjustable parameters and globals
 #include "wifiConnection.h"  // Wi-fi connection and OTA handler
 #include "mqttConnection.h"  // MQTT service
 #include "alertFlash.h"      // Bicolor LED indicator for mode indications
 #include "measurement.h"     // Read ADC and calculate electrical parameters
+
+void publishActive();
+void publishIdle();
+
+TickTwo activeTicker(publishActive, ACTIVE_INTERVAL_MS, 0, MILLIS);
+TickTwo idleTicker(publishIdle, IDLE_INTERVAL_MS, 0, MILLIS);
 
 // ─── Setup ────────────────────────────────────────────────────────────────────
 void setup() {
@@ -47,6 +54,7 @@ void setup() {
   mqtt.setBufferSize(MQTT_MAX_PACKET_SIZE);  // Discovery payloads ~420 bytes, default 256 too small
   measure();                                 // warm-up: seed offsetV/offsetI before first real publish
   mqttConnect();                             // CONNECT TO HA
+  idleTicker.start();                        // begin in idle (not charging) state
 #endif
 }  // setup()
 
@@ -64,29 +72,41 @@ void loop() {
   return;  // skip WiFi/MQTT entirely while calibrating
 #endif
 
-  if (WiFi.status() != WL_CONNECTED) wifiConnect();  // Reconnect to Wi-Fi if needed
-  if (!mqtt.connected()) mqttConnect();              // Reconnect to MQTT if needed
-  mqtt.loop();                                       // Handle MQTT
-  ArduinoOTA.handle();                               // Handle OTA
-  measure();                                         // Read ADC and calculate electrical parameters
-  publishReading();                                  // Publish measurements to MQTT
+  if (WiFi.status() != WL_CONNECTED) wifiConnect();
+  if (!mqtt.connected()) mqttConnect();
+  mqtt.loop();
+  ArduinoOTA.handle();
+  updateBicolorLed();  // now driven internally by slowFlash/fastFlash TickTwo objects
+  measure();           // free-running, every pass
 
-  // Liveness watchdog: catches zombie associations where WiFi.status()
-  // still reports WL_CONNECTED but the link is actually dead
-  if (millis() - lastSuccessfulPublish > MQTT_LIVENESS_TIMEOUT_MS) {
-    WiFi.disconnect();  // tear down the stale association explicitly
-    wifiConnect();      // re-scan and reassociate (picks best RSSI fresh)
-  }
-
-  // adaptive reporting - faster when charging
   bool isActive = (reading.irms >= LOAD_THRESHOLD_A);
   setBicolorLedState(isActive ? LED_GREEN_SLOW : LED_GREEN_STEADY);
-  long intervalMs = isActive ? ACTIVE_INTERVAL_MS : IDLE_INTERVAL_MS;
-  unsigned long wakeAt = millis() + intervalMs;
-  while (millis() < wakeAt) {
-    ArduinoOTA.handle();
-    mqtt.loop();
-    updateBicolorLed();  // sustain flash during sleep window
-    delay(100);
+
+  static bool wasActive = false;
+  if (isActive != wasActive) {
+    if (isActive) {
+      idleTicker.stop();
+      activeTicker.start();
+    } else {
+      activeTicker.stop();
+      idleTicker.start();
+    }
+    publishReading();  // force immediate publish on transition
+    wasActive = isActive;
+  }
+
+  activeTicker.update();
+  idleTicker.update();
+
+  if (millis() - lastSuccessfulPublish > MQTT_LIVENESS_TIMEOUT_MS) {
+    WiFi.disconnect();
+    wifiConnect();
   }
 }  // loop()
+
+void publishActive() {
+  publishReading();
+}
+void publishIdle() {
+  publishReading();
+}
