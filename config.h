@@ -24,7 +24,7 @@
 
 #include "secrets.h"  // WIFI_SSID, WIFI_PASS, MQTT_HOST, MQTT_USER, MQTT_PASS, OTA_PASSWORD
 
-static const char* FW_VERSION = "1.0.7";  // bump on each release
+static const char* FW_VERSION = "1.0.8";  // bump on each release
 // 1.0.0 2026.07.06 initial commit
 // 1.0.1 2026.07.06 minor cleanup
 // 1.0.2 2026.07.07 rescaled CURRENT_SCALE due to error in CT turns
@@ -33,6 +33,7 @@ static const char* FW_VERSION = "1.0.7";  // bump on each release
 // 1.0.5 2026.07.09 add LED mode indications
 // 1.0.6 2026.07.10 moved measure() to measurement module
 // 1.0.7 2026.07.14 improve WiFi connection loss response
+// 1.0.8 2026.07.22 use TickTwo to drive publishReading and LED flashes, change OTA_HOSTNAME
 
 // --- Wi-Fi Timeout ------------------------------------------------------------
 static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000;  // 15 s WiFi connect timeout
@@ -47,7 +48,7 @@ static constexpr int MQTT_KEEPALIVE_S = 60;                       // seconds bet
 inline unsigned long lastSuccessfulPublish = 0;                   // defined in mqttConnection.cpp. make it global here
 
 // ─── OTA ──────────────────────────────────────────────────────────────────────
-#define OTA_HOSTNAME "ota-monitor-01"
+#define OTA_HOSTNAME "ac-monitor-01"
 
 // ─── Electrical Parameters ────────────────────────────────────────────────────
 static constexpr float LINE_FREQUENCY = 60.0f;  // Hz – use local utility frequency
@@ -58,12 +59,13 @@ static constexpr int SAMPLE_INTERVAL_US = 400;  // microseconds between ADC samp
 static constexpr float LOAD_THRESHOLD_A = 1.0f;                       // amps — switches report interval
 static constexpr unsigned long IDLE_INTERVAL_MS = 10UL * 60 * 1000;   // 10 min when I < threshold
 static constexpr unsigned long ACTIVE_INTERVAL_MS = 1UL * 60 * 1000;  // 60 sec when I >= threshold
-static constexpr unsigned long MQTT_LIVENESS_TIMEOUT_MS = IDLE_INTERVAL_MS + 60UL * 1000;  // must exceed the longest gap between publishes (idle interval), plus a safety margin
+// MQTT_LIVENESS_TIMEOUT_MS must exceed the longest gap between publishes (idle interval), plus a safety margin
+static constexpr unsigned long MQTT_LIVENESS_TIMEOUT_MS = IDLE_INTERVAL_MS + 60UL * 1000;
 static constexpr float CURRENT_DEADBAND_A = 0.3f;                     // treat current & power as zero to mask noise
 
 // ─── Device Connections ───────────────────────────────────────────────────────
-static constexpr int PIN_VOLTAGE = 0;    // ADC1_CH0
-static constexpr int PIN_CURRENT = 3;    // ADC1_CH3
+static constexpr int PIN_VOLTAGE = 0;    // ADC1_CH0 from ZMPT101B voltage sense module
+static constexpr int PIN_CURRENT = 3;    // ADC1_CH3 from Current Transformer
 static constexpr int PIN_LED_RED = 5;    // GPIO5 bicolor LED
 static constexpr int PIN_LED_GREEN = 6;  // GPIO6 bicolor LED
 
