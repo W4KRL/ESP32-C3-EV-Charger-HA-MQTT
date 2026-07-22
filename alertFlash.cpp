@@ -12,100 +12,62 @@
  * at 500 ms, and fast states flash at 150 ms.
  *
  * @author Karl Berger with Claude
- * @date 2026.07.10
+ * @date 2026.07.21
  */
 
 #include "alertFlash.h"
 #include "config.h"
+#include <TickTwo.h>
+
+static uint8_t currentState = LED_OFF;
+static bool flashOn = false;
+
+static void writeGreen() { digitalWrite(PIN_LED_GREEN, HIGH); digitalWrite(PIN_LED_RED, LOW); }
+static void writeRed()   { digitalWrite(PIN_LED_GREEN, LOW); digitalWrite(PIN_LED_RED, HIGH); }
+static void writeOff()   { digitalWrite(PIN_LED_GREEN, LOW); digitalWrite(PIN_LED_RED, LOW); }
+
+static void toggleFlash() {
+  flashOn = !flashOn;
+  if (!flashOn) {
+    writeOff();
+  } else if (currentState == LED_GREEN_SLOW || currentState == LED_GREEN_FAST) {
+    writeGreen();
+  } else if (currentState == LED_RED_SLOW || currentState == LED_RED_FAST) {
+    writeRed();
+  }
+}
+
+TickTwo slowFlash(toggleFlash, 500, 0, MILLIS);
+TickTwo fastFlash(toggleFlash, 150, 0, MILLIS);
 
 void initBicolorLed() {
   pinMode(PIN_LED_GREEN, OUTPUT);
   pinMode(PIN_LED_RED, OUTPUT);
 }
 
-static uint8_t currentState = LED_OFF;
-static bool flashOn = false;
-static unsigned long lastToggle = 0;
-
 void setBicolorLedState(uint8_t state) {
   if (state > LED_RED_FAST) state = LED_OFF;
+  if (state == currentState) return;
 
-  if (state != currentState) {
-    currentState = state;
-    flashOn = false;
-    lastToggle = millis();
+  currentState = state;
+  slowFlash.stop();
+  fastFlash.stop();
+  flashOn = false;
+  writeOff();  // matches original: starts dark, first toggle (after one interval) lights it
+
+  switch (currentState) {
+    case LED_GREEN_STEADY: writeGreen(); break;
+    case LED_RED_STEADY:   writeRed();   break;
+    case LED_GREEN_SLOW:
+    case LED_RED_SLOW:     slowFlash.start(); break;
+    case LED_GREEN_FAST:
+    case LED_RED_FAST:     fastFlash.start(); break;
+    case LED_OFF:
+    default: break;  // already off
   }
 }
 
 void updateBicolorLed() {
-  unsigned long now = millis();
-
-  auto writeGreen = []() {
-    digitalWrite(PIN_LED_GREEN, HIGH);
-    digitalWrite(PIN_LED_RED, LOW);
-  };
-
-  auto writeRed = []() {
-    digitalWrite(PIN_LED_GREEN, LOW);
-    digitalWrite(PIN_LED_RED, HIGH);
-  };
-
-  auto writeOff = []() {
-    digitalWrite(PIN_LED_GREEN, LOW);
-    digitalWrite(PIN_LED_RED, LOW);
-  };
-
-  switch (currentState) {
-    case LED_OFF:
-      writeOff();
-      break;
-
-    case LED_GREEN_STEADY:
-      writeGreen();
-      break;
-
-    case LED_GREEN_SLOW:
-      if (now - lastToggle >= 500) {
-        lastToggle = now;
-        flashOn = !flashOn;
-      }
-      if (flashOn) writeGreen();
-      else writeOff();
-      break;
-
-    case LED_GREEN_FAST:
-      if (now - lastToggle >= 150) {
-        lastToggle = now;
-        flashOn = !flashOn;
-      }
-      if (flashOn) writeGreen();
-      else writeOff();
-      break;
-
-    case LED_RED_STEADY:
-      writeRed();
-      break;
-
-    case LED_RED_SLOW:
-      if (now - lastToggle >= 500) {
-        lastToggle = now;
-        flashOn = !flashOn;
-      }
-      if (flashOn) writeRed();
-      else writeOff();
-      break;
-
-    case LED_RED_FAST:
-      if (now - lastToggle >= 150) {
-        lastToggle = now;
-        flashOn = !flashOn;
-      }
-      if (flashOn) writeRed();
-      else writeOff();
-      break;
-
-    default:
-      writeOff();
-      break;
-  }
+  slowFlash.update();
+  fastFlash.update();
 }
