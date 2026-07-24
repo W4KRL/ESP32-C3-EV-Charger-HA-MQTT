@@ -17,14 +17,14 @@
  * see the Calibration section for the bench procedure.
  *
  * @author Karl Berger with Claude
- * @date 2026.07.10
+ * @date 2026.07.24
  */
 
 #pragma once
 
 #include "secrets.h"  // WIFI_SSID, WIFI_PASS, MQTT_HOST, MQTT_USER, MQTT_PASS, OTA_PASSWORD
 
-static const char* FW_VERSION = "1.0.8";  // bump on each release
+static const char* FW_VERSION = "1.0.9";  // bump on each release
 // 1.0.0 2026.07.06 initial commit
 // 1.0.1 2026.07.06 minor cleanup
 // 1.0.2 2026.07.07 rescaled CURRENT_SCALE due to error in CT turns
@@ -34,6 +34,7 @@ static const char* FW_VERSION = "1.0.8";  // bump on each release
 // 1.0.6 2026.07.10 moved measure() to measurement module
 // 1.0.7 2026.07.14 improve WiFi connection loss response
 // 1.0.8 2026.07.22 use TickTwo to drive publishReading and LED flashes, change OTA_HOSTNAME
+// 1.0.9 2026.07.24 fix micros() rollover in measure()
 
 // --- Wi-Fi Timeout ------------------------------------------------------------
 static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000;  // 15 s WiFi connect timeout
