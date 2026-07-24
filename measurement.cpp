@@ -22,7 +22,7 @@
  * affecting the reported voltage.
  *
  * @author Karl Berger with Claude
- * @date 2026.07.10
+ * @date 2026.07.24
  */
 
 // measurement.cpp
@@ -41,18 +41,15 @@ void initADC() {
 
 // ─── Measurement ──────────────────────────────────────────────────────────────
 void measure() {
-  static float offsetV = 0.0f;  // static: initialized once, retains value between calls
-  static float offsetI = 0.0f;  // updated each burst to track ADC DC bias
-
+  static float offsetV = 0.0f;                  // static: initialized once, retains value between calls
+  static float offsetI = 0.0f;                  // updated each burst to track ADC DC bias
   double sumV2 = 0.0, sumI2 = 0.0, sumP = 0.0;  // need double for squared values
-
   float sumV = 0.0f, sumI = 0.0f;
+  const unsigned long BURST_US = (unsigned long)(SAMPLE_CYCLES * (1000000.0f / LINE_FREQUENCY));
 
-  const long BURST_US = (long)(SAMPLE_CYCLES * (1000000.0f / LINE_FREQUENCY));
   long count = 0;
-
-  unsigned long endTime = micros() + BURST_US;
-  while (micros() < endTime) {
+  unsigned long startTime = micros();
+  while ((micros() - startTime) < BURST_US) {
     float v_mv = analogReadMilliVolts(PIN_VOLTAGE);
     float i_mv = analogReadMilliVolts(PIN_CURRENT);
 
@@ -71,7 +68,7 @@ void measure() {
     reading.irms = 0;
     reading.apparent = 0;
     reading.realPower = 0;
-    reading.pf = 0;
+    reading.pf = 1.0f;  // to match the CURRENT_DEADBAND_A test
     return;
   }
 
@@ -95,6 +92,6 @@ void measure() {
     reading.irms = 0.0f;
     reading.apparent = 0.0f;
     reading.realPower = 0.0f;
-    reading.pf = 1.0f;
+    reading.pf = 1.0f;  // to keep HA graphs clean
   }
 }  // measure()
