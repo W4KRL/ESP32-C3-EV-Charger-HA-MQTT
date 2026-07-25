@@ -1,15 +1,15 @@
 # ESP32-C3 EV Charger AC Power Monitor
 
-An MQTT-based AC power monitor for a 240 V EV charging circuit, built on an ESP32-C3.
-Publishes voltage, current, real power, apparent power, and power factor to
+The ESP32-C3 EV Charger is an MQTT-based AC power monitor for a 240 V EV charging circuit, built on an ESP32-C3 SupeMini.
+It publishes voltage, current, real power, apparent power (VA), and power factor to
 Home Assistant via MQTT discovery.
 
 ## Hardware
 
-- **ESP32-C3** (native USB, ADC1 only — see Pin Assignments below)
+- **ESP32-C3 SuperMini** development board
 - **ZMPT101B** voltage transformer module (5 V supply), for line voltage sensing
 - **Open-jaw current transformer**, 100 A : 3000:1, wired with 4 primary turns
-  for an effective ratio of 750:1
+  for an effective ratio of 750:1 and maximum current of 25 A.
 - Resistor divider (voltage channel) and burden resistor + bias network
   (current channel) scale both sensor outputs into the ESP32-C3's 0–3.3 V
   ADC range
