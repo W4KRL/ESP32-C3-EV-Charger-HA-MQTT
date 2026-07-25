@@ -8,11 +8,13 @@ Home Assistant via MQTT discovery.
 
 - **ESP32-C3 SuperMini** development board
 - **ZMPT101B** voltage transformer module (5 V supply), for line voltage sensing
-- **Open-jaw current transformer**, 100 A : 3000:1, wired with 4 primary turns
+- **Open-jaw current transformer**, 100 A, 3000:1, wired with 4 primary turns
   for an effective ratio of 750:1 and maximum current of 25 A.
+- **DC-12003** 240 Vac to 5 Vdc converter module for system power
 - Resistor divider (voltage channel) and burden resistor + bias network
   (current channel) scale both sensor outputs into the ESP32-C3's 0–3.3 V
   ADC range
+- **Bi-Color LED** for for operating and failure mode indication
 - Stripboard construction, with high-voltage components physically grouped
   and separated from the low-voltage ESP32-C3/signal-conditioning section
   
@@ -36,7 +38,7 @@ is part of the C3's default JTAG mapping.
 ## Features
 
 - MQTT discovery — auto-registers all sensors in Home Assistant on connect,
-  with RSSI and firmware version grouped under the Diagnostic category
+  with RSSI, BSSID, and firmware version grouped under the Diagnostic category
 - Last Will and Testament (LWT) for accurate availability reporting
 - Adaptive publish interval — shorter interval while current is above a
   configurable load threshold, longer interval when idle
