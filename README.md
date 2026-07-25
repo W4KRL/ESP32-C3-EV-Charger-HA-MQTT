@@ -10,7 +10,7 @@ Home Assistant via MQTT discovery.
 - **ZMPT101B** voltage transformer module (5 V supply), for line voltage sensing
 - **Open-jaw current transformer**, 100 A, 3000:1, wired with 4 primary turns
   for an effective ratio of 750:1 and maximum current of 25 A.
-- **DC-12003** converter mofule provides 5 Vdc system power from the 240 Vac line
+- **WX-DC12003** converter mofule provides 5 Vdc system power from the 240 Vac line
 - Resistor divider (voltage channel) and burden resistor + bias network
   (current channel) scale both sensor outputs into the ESP32-C3's 0–3.3 V
   ADC range
