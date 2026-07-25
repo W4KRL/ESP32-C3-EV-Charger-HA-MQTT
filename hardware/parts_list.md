@@ -36,6 +36,6 @@
 
 | Ref | Description                               | Value / Spec     | Qty | Notes |
 |-----|-------------------------------------------|------------------|-----|-------|
-| —   | Enclosure box, weatherproof, non-metallic | 2-gang           | 1   | Hubbell |
+| —   | Enclosure box, weatherproof, non-metallic | 2-gang           | 1   | Hubbell Model #PDB77550GY |
 | —   | Wall plate, 2-gang blank & Decora         | —                | 1   |  |
 | —   | Waterproof cable grip                     |                  | 1   |  |
