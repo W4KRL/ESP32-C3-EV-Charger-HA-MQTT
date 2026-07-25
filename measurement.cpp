@@ -63,12 +63,12 @@ void measure() {
     delayMicroseconds(SAMPLE_INTERVAL_US);
   }
 
-  if (count == 0) {  // guard: burst produced no samples — zero output and bail out
+  if (count == 0) {  // guard: burst produced no samples — zero the outputs and bail out
     reading.vrms = 0;
     reading.irms = 0;
-    reading.apparent = 0;
-    reading.realPower = 0;
-    reading.pf = 1.0f;  // to match the CURRENT_DEADBAND_A test
+    reading.va = 0;         // volt-amps
+    reading.realPower = 0;  // Watts
+    reading.pf = 1.0f;      // to match the CURRENT_DEADBAND_A test
     return;
   }
 
@@ -81,16 +81,16 @@ void measure() {
   // update values in PowerReading struct
   reading.vrms = vrms_mv * VOLTAGE_SCALE;
   reading.irms = irms_mv * CURRENT_SCALE;
-  reading.apparent = reading.vrms * reading.irms;
+  reading.va = reading.vrms * reading.irms;
   reading.realPower = fabsf(sumP / count * VOLTAGE_SCALE * CURRENT_SCALE);
-  reading.pf = (reading.apparent > 0.1f)
-                 ? constrain(reading.realPower / reading.apparent, 0.0f, 1.0f)
+  reading.pf = (reading.va > 0.1f)
+                 ? constrain(reading.realPower / reading.va, 0.0f, 1.0f)
                  : 0.0f;
   if (reading.irms < CURRENT_DEADBAND_A) {
     // suppress ADC noise-floor current when idle; PF reported as 1.0
     // (rather than 0.0) so idle periods don't distort HA history graphs
     reading.irms = 0.0f;
-    reading.apparent = 0.0f;
+    reading.va = 0.0f;
     reading.realPower = 0.0f;
     reading.pf = 1.0f;  // to keep HA graphs clean
   }
