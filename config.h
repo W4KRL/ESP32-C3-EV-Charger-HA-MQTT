@@ -44,9 +44,9 @@ static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000;  // 15 s WiFi co
 #define MQTT_TOPIC_POWER "home/power/ac_monitor/state"
 #define MQTT_TOPIC_STATUS "home/power/ac_monitor/status"
 static constexpr int MQTT_PORT = 1883;
-static constexpr unsigned long MQTT_CONNECT_TIMEOUT_MS = 15000;   // 15 s MQTT connect timeout
-static constexpr int MQTT_KEEPALIVE_S = 60;                       // seconds between activity pings
-inline unsigned long lastSuccessfulPublish = 0;                   // defined in mqttConnection.cpp. make it global here
+static constexpr unsigned long MQTT_CONNECT_TIMEOUT_MS = 15000;  // 15 s MQTT connect timeout
+static constexpr int MQTT_KEEPALIVE_S = 60;                      // seconds between activity pings
+inline unsigned long lastSuccessfulPublish = 0;                  // defined in mqttConnection.cpp. make it global here
 
 // ─── OTA ──────────────────────────────────────────────────────────────────────
 #define OTA_HOSTNAME "ac-monitor-01"
@@ -62,7 +62,7 @@ static constexpr unsigned long IDLE_INTERVAL_MS = 10UL * 60 * 1000;   // 10 min 
 static constexpr unsigned long ACTIVE_INTERVAL_MS = 1UL * 60 * 1000;  // 60 sec when I >= threshold
 // MQTT_LIVENESS_TIMEOUT_MS must exceed the longest gap between publishes (idle interval), plus a safety margin
 static constexpr unsigned long MQTT_LIVENESS_TIMEOUT_MS = IDLE_INTERVAL_MS + 60UL * 1000;
-static constexpr float CURRENT_DEADBAND_A = 0.3f;                     // treat current & power as zero to mask noise
+static constexpr float CURRENT_DEADBAND_A = 0.3f;  // treat current & power as zero to mask noise
 
 // ─── Device Connections ───────────────────────────────────────────────────────
 static constexpr int PIN_VOLTAGE = 0;    // ADC1_CH0 from ZMPT101B voltage sense module
@@ -105,7 +105,7 @@ static constexpr float CURRENT_SCALE = 0.03456f;  // ← MUST calibrate before u
 struct PowerReading {
   float vrms;       // RMS voltage (V)
   float irms;       // RMS current (A)
-  float apparent;   // Apparent power (VA)
+  float va;         // Apparent power (VA)
   float realPower;  // Real power (W)
   float pf;         // Power factor (0.0 - 1.0)
 };
