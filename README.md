@@ -25,7 +25,7 @@ and power factor to Home Assistant via MQTT discovery.
 
 - [Schematic](hardware/schematic/ac_monitor_schematic.pdf)
 - [Stripboard layout](hardware/stripboard/ac_monitor_stripboard.pdf)
-- [Parts list](parts_list.md)
+- [Parts list](/hardware/parts_list.md)
 - [Build photos](hardware/photos/)
 
 ### Pin assignments
