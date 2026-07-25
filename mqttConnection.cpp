@@ -61,7 +61,7 @@ void publishReading() {
   doc["vrms"] = serialized(String(reading.vrms, 1));
   doc["irms"] = serialized(String(reading.irms, 3));
   doc["watts"] = serialized(String(reading.realPower, 1));
-  doc["va"] = serialized(String(reading.apparent, 1));
+  doc["va"] = serialized(String(reading.va, 1));
   doc["pf"] = serialized(String(reading.pf, 3));
   doc["rssi"] = WiFi.RSSI();
   doc["bssid"] = WiFi.BSSIDstr();
