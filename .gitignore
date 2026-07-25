@@ -1,4 +1,6 @@
 secrets.h
+*.old
+*.bak
 
 # Arduino IDE build artifacts (if ever generated in-folder)
 build/
