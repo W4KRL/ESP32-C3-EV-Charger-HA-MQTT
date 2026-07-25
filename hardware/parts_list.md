@@ -13,13 +13,13 @@
 | R4         | Resistor                               | 1 kΩ, 0.125 W               | 1   | |
 | R5         | Resistor                               | 2 kΩ, 0.125 W               | 1   | |
 | R6         | Resistor                               | 1 kΩ, 0.125 W               | 1   | |
-| R7, R8     | Resistor                               | 82 kΩ, 0.5 W                | 2   | |
+| R7, R8     | Resistor                               | 82 kΩ, 0.5 W                | 2   | Voltage sensor burden resistors |
 | C1, C2, C5 | Capacitor, ceramic                     | 100 nF                      | 3   | ADC anti-alias filtering |
 | C3         | Capacitor, electrolytic                | 10 µF, 6.3 V                | 1   | CT bias decoupling |
 | C4         | Capacitor, electrolytic                | 220 µF, 16 V                | 1   | 5 V supply filter | 
 | CT         | Current transformer                    | 3000:1, 100 A, open-jaw     | 1   | 4 primary turns → effective 750:1 |
-| F1         | TR5 fuse                               | 250 mA, 250 Vac             | 1   |
-| —          | Stripboard, copper                     | 93 × 55 mm                  | 1   | Tayda Electronics A-5031 |
+| F1         | TR5 fuse                               | 250 mA, 250 Vac             | 1   | |
+| —          | Stripboard, copper                     | 93X55 mm Tayda Electronics A-5031 | 1   |  |
 | TB1        | Terminal block, pass-through           | 2-pos, rated ≥250 Vac       | 1   | |
 | TB2, TB3   | Terminal block, screw, PCB mount       | 2-pos, 0.2 in pitch         | 2   | |
 | H1         | —                                      | Supplied with U1            | —   | |
