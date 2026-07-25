@@ -37,16 +37,16 @@
  */
 
 // ─── Libraries ────────────────────────────────────────────────────────────────
-#include <WiFi.h>            // Built-in Wi-Fi connection
 #include <ArduinoOTA.h>      // Built-in Over-the-Air update service
 #include <TickTwo.h>         // Ticker library by Stefan Staub https://github.com/sstaub/TickTwo
-#include "config.h"          // Credentials, adjustable parameters and globals
-#include "wifiConnection.h"  // Wi-fi connection and OTA handler
-#include "mqttConnection.h"  // MQTT service
+#include <WiFi.h>            // Built-in Wi-Fi connection
 #include "alertFlash.h"      // Bicolor LED indicator for mode indications
+#include "config.h"          // Credentials, adjustable parameters and globals
 #include "measurement.h"     // Read ADC and calculate electrical parameters
+#include "mqttConnection.h"  // MQTT service
+#include "wifiConnection.h"  // Wi-fi connection and OTA handler
 
-// instantiate Ticker for publishReading()
+// Instantiate Ticker for adaptive publishReading() interval
 TickTwo publishTicker(publishReading, IDLE_INTERVAL_MS, 0, MILLIS);
 
 // ─── Setup ────────────────────────────────────────────────────────────────────
@@ -97,13 +97,13 @@ void loop() {
   static bool wasActive = false;
   if (isActive != wasActive) {
     unsigned long newInterval = isActive ? ACTIVE_INTERVAL_MS : IDLE_INTERVAL_MS;
-    publishTicker.interval(newInterval);
-    publishTicker.stop();   // End current interval immediately upon active/idle transition
-    publishTicker.start();  // Guarantees a clean restart with the new interval
-    publishReading();       // Force an immediate publish on an active/idle transition
-    wasActive = isActive;   // Remember mode for next loop() pass
+    publishTicker.interval(newInterval);  // Adaptive ticker interval
+    publishTicker.stop();                 // End current interval immediately upon active/idle transition
+    publishTicker.start();                // Guarantees a clean restart with the new interval
+    publishReading();                     // Force an immediate publish on an active/idle transition
+    wasActive = isActive;                 // Remember mode for next loop() pass
   }
-  publishTicker.update(); // Call publishReading when fired by ticker
+  publishTicker.update();  // Call publishReading when fired by ticker
 
   if (millis() - lastSuccessfulPublish > MQTT_LIVENESS_TIMEOUT_MS) {
     WiFi.disconnect();
