@@ -6,7 +6,7 @@ Home Assistant via MQTT discovery.
 
 ## Hardware
 
-- **ESP32-C3 SuperMini** development board
+- **ESP32-C3 SuperMini** development board with USB adapter and 3.3 Vdc regulator
 - **ZMPT101B** voltage transformer module (5 V supply), for line voltage sensing
 - **Open-jaw current transformer**, 100 A, 3000:1, wired with 4 primary turns
   for an effective ratio of 750:1 and maximum current of 25 A.
