@@ -111,6 +111,8 @@ writing). Requires:
 - `ArduinoJson` by Benoit Blanchon
 - `TickTwo` by Stefan Staub
 - ESP32 board package (native USB support for the C3)
+- Schematic drawn in [ExpressSCH Plus]{https://expresssch.apponic.com/}
+- Stripboard design in [Lochmaster 4](https://www.electronic-software-shop.com/lng/en/electronic-software/)
 
 ## Safety
 
