@@ -17,9 +17,9 @@ and power factor to Home Assistant via MQTT discovery.
 - **Bi-Color LED** for for operating and failure mode indication
 - Stripboard construction, with high-voltage components physically grouped
   and separated from the low-voltage ESP32-C3/signal-conditioning section
-- *NEMA 6-20R* 205 Vac, 20 A receptacle for EVSE
-- *2-Gang PVC (Non-metallic) weatherproof Outlet Box** Hubbell Model #PDB77550GY
-- *6-ft 12/3 SJTW Extension cord NEMA 6-20 R/R 20 A 250 V**
+- **NEMA 6-20R** 205 Vac, 20 A receptacle for EVSE
+- **2-Gang PVC (Non-metallic) weatherproof Outlet Box** Hubbell Model #PDB77550GY
+- **6-ft 12/3 SJTW Extension cord NEMA 6-20 R/R 20 A 250 V**
   
 ## Documentation
 
