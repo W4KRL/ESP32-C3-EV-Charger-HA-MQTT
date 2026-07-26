@@ -7,7 +7,7 @@
  * per-burst voltage/current sampling that updates the global PowerReading
  * struct (see config.h). Each call to measure() samples both channels for
  * SAMPLE_CYCLES line cycles, tracks the DC bias offset per channel, and
- * computes RMS voltage, RMS current, real power, apparent power, and
+ * computes RMS voltage, RMS current, real power, apparent power (va), and
  * power factor, applying VOLTAGE_SCALE/CURRENT_SCALE and
  * CURRENT_DEADBAND_A (all in config.h).
  *

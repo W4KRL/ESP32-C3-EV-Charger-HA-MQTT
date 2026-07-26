@@ -23,12 +23,16 @@ static uint8_t currentState = LED_OFF;
 static bool flashOn = false;
 
 // clang-format off
+// Write-only helpers: enforce mutual exclusion between green/red LEDs
 static void writeGreen() { digitalWrite(PIN_LED_GREEN, HIGH); digitalWrite(PIN_LED_RED, LOW); }
 static void writeRed()   { digitalWrite(PIN_LED_GREEN, LOW); digitalWrite(PIN_LED_RED, HIGH); }
 static void writeOff()   { digitalWrite(PIN_LED_GREEN, LOW); digitalWrite(PIN_LED_RED, LOW); }
 
+// Toggle handler used by both slowFlash and fastFlash tickers
 static void toggleFlash() {
   flashOn = !flashOn;
+
+  // When flashOn is false, LED is forced off regardless of color
   if (!flashOn) {
     writeOff();
   } else if (currentState == LED_GREEN_SLOW || currentState == LED_GREEN_FAST) {
@@ -38,21 +42,25 @@ static void toggleFlash() {
   }
 }
 
-// Instantiate tickers
+// Instantiate tickers for slow and fast flash intervals
 TickTwo slowFlash(toggleFlash, 500, 0, MILLIS);
 TickTwo fastFlash(toggleFlash, 150, 0, MILLIS);
 
-// set LED pin connections
+// Configure LED pins as outputs
 void initBicolorLed() {
   pinMode(PIN_LED_GREEN, OUTPUT);
   pinMode(PIN_LED_RED, OUTPUT);
 }
 
 void setBicolorLedState(uint8_t state) {
+  // Clamp invalid states to LED_OFF
   if (state > LED_RED_FAST) state = LED_OFF;
   if (state == currentState) return;
 
+  // No change — nothing to update
   currentState = state;
+
+  // Stop any active flash timers and reset flash state 
   slowFlash.stop();
   fastFlash.stop();
   flashOn = false;
@@ -68,7 +76,7 @@ case LED_GREEN_STEADY:
     case LED_GREEN_FAST:
     case LED_RED_FAST:     fastFlash.start(); break;
     case LED_OFF:
-    default: break;        // already off
+    default: break;        // Already off
   }
 }
 // clang-format on
