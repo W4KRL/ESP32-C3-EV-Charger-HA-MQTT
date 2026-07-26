@@ -83,7 +83,8 @@ procedure.
 
 | Topic                                           | Purpose                           |
 |-------------------------------------------------|-----------------------------------|
-| `home/power/ac_monitor/state`                   | JSON payload: vrms, irms, watts, va, pf, rssi, fw, bssid |
+| `home/power/ac_monitor/state`                   | JSON payload: vrms, irms, watts,  |
+|                                                 | va, pf, rssi, fw, bssid           |
 | `home/power/ac_monitor/status`                  | `online` / `offline` (LWT)        |
 | `homeassistant/sensor/ac_monitor_01/.../config` | HA discovery topics               |
 
