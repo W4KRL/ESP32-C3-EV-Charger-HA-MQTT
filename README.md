@@ -40,10 +40,10 @@ This organization keeps the sketch folder tidy, supports modular code, works sea
   
 ## Documentation
 
-- [Schematic](hardware/schematic/ac_monitor_schematic.pdf)
-- [Stripboard layout](hardware/stripboard/ac_monitor_stripboard.pdf)
-- [Parts list](/hardware/parts_list.md)
-- [Build photos](hardware/photos/)
+- [Schematic](assets/schematic/ac_monitor_schematic.pdf)
+- [Stripboard layout](assets/stripboard/ac_monitor_stripboard.pdf)
+- [Parts list](/assets/parts_list.md)
+- [Build photos](assets/photos/)
 
 ### Pin assignments
 
