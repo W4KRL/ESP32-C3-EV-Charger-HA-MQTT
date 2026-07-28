@@ -89,18 +89,19 @@ void publishDiscovery() {
     const char* icon;
     const char* category;
     const char* stateClass;
+    bool        forceUpdate;
   };
 
   // clang-format off
 static const SensorDef sensors[] = {
-  { "AC Voltage",       "vrms",  "V",   "voltage",         nullptr,         nullptr,       "measurement" },
-  { "AC Current",       "irms",  "A",   "current",         nullptr,         nullptr,       "measurement" },
-  { "Real Power",       "watts", "W",   "power",           nullptr,         nullptr,       "measurement" },
-  { "Apparent Power",   "va",    "VA",  nullptr,           "mdi:sine-wave", nullptr,       "measurement" },
-  { "Power Factor",     "pf",    "",    "power_factor",    nullptr,         nullptr,       "measurement" },
-  { "RSSI",              "rssi", "dBm", "signal_strength", nullptr,         "diagnostic",  "measurement" },
-  { "WiFi BSSID",       "bssid", "",    nullptr,           "mdi:access-point-network", "diagnostic", nullptr },
-  { "Firmware Version", "fw",    "",    nullptr,           "mdi:chip",      "diagnostic",  nullptr },
+  { "AC Voltage",       "vrms",  "V",   "voltage",         nullptr,         nullptr,       "measurement", true  },
+  { "AC Current",       "irms",  "A",   "current",         nullptr,         nullptr,       "measurement", true  },
+  { "Real Power",       "watts", "W",   "power",           nullptr,         nullptr,       "measurement", false },
+  { "Apparent Power",   "va",    "VA",  nullptr,           "mdi:sine-wave", nullptr,       "measurement", false },
+  { "Power Factor",     "pf",    "",    "power_factor",    nullptr,         nullptr,       "measurement", false },
+  { "RSSI",              "rssi", "dBm", "signal_strength", nullptr,         "diagnostic",  "measurement", false },
+  { "WiFi BSSID",       "bssid", "",    nullptr,           "mdi:access-point-network", "diagnostic", nullptr, false },
+  { "Firmware Version", "fw",    "",    nullptr,           "mdi:chip",      "diagnostic",  nullptr, false },
 };
   // clang-format on
 
@@ -122,6 +123,7 @@ static const SensorDef sensors[] = {
     if (s.icon) doc["icon"] = s.icon;
     if (s.category) doc["entity_category"] = s.category;
     if (s.stateClass) doc["state_class"] = s.stateClass;
+    if (s.forceUpdate) doc["force_update"] = true;
     doc["availability_topic"] = MQTT_TOPIC_STATUS;
     doc["payload_available"] = "online";
     doc["payload_not_available"] = "offline";
