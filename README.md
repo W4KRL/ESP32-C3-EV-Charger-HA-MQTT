@@ -37,7 +37,7 @@ This organization keeps the sketch folder tidy, supports modular code, works sea
 - **NEMA 6-20R** 205 Vac, 20 A receptacle for EVSE
 - **2-Gang PVC (Non-metallic) weatherproof Outlet Box** Hubbell Model #PDB77550GY
 - **6-ft 12/3 SJTW Extension cord NEMA 6-20 R/R 20 A 250 V**
-  
+
 ## Documentation
 
 - [Schematic](assets/schematic/ac_monitor_schematic.pdf)
@@ -48,14 +48,14 @@ This organization keeps the sketch folder tidy, supports modular code, works sea
 ### Pin assignments
 
 | Signal      | Pin        | Notes                   |
-|-------------|------------|-------------------------|
+| ----------- | ---------- | ----------------------- |
 | Voltage     | GPIO0 (A0) | ZMPT101B divider output |
 | Current     | GPIO3 (A3) | CT burden/bias node     |
 | LED (red)   | GPIO5      | Red anode               |
 | LED (green) | GPIO6      | Green anode             |
 
-Use only GPIO0, GPIO1, GPIO3 and GPIO4 for ADC. 
-Avoid GPIO2. It is a boot-mode strapping pin. 
+Use only GPIO0, GPIO1, GPIO3 and GPIO4 for ADC.
+Avoid GPIO2. It is a boot-mode strapping pin.
 Avoid GPIO5. It is on ADC2 shared with Wi-Fi.
 
 ## Features
@@ -98,17 +98,17 @@ procedure.
 
 ## MQTT Topics
 
-| Topic                                           | Purpose                           |
-|-------------------------------------------------|-----------------------------------|
-| `home/power/ac_monitor/state`                   | JSON payload: vrms, irms, watts,  |
-|                                                 | va, pf, rssi, fw, bssid           |
-| `home/power/ac_monitor/status`                  | `online` / `offline` (LWT)        |
-| `homeassistant/sensor/ac_monitor_01/.../config` | HA discovery topics               |
+| Topic                                           | Purpose                          |
+| ----------------------------------------------- | -------------------------------- |
+| `home/power/ac_monitor/state`                   | JSON payload: vrms, irms, watts, |
+|                                                 | va, pf, rssi, fw, bssid          |
+| `home/power/ac_monitor/status`                  | `online` / `offline` (LWT)       |
+| `homeassistant/sensor/ac_monitor_01/.../config` | HA discovery topics              |
 
 ## LED Indications
 
 | Aspect       | Indication                       |
-|--------------|----------------------------------|
+| ------------ | -------------------------------- |
 | OFF          | No power                         |
 | GREEN STEADY | Normal operation (idle)          |
 | GREEN SLOW   | Charging active                  |
@@ -122,7 +122,7 @@ procedure.
 Arduino IDE 2.3.10 (PlatformIO has ESP32-C3 compatibility issues at time of
 writing). Requires:
 
-- `PubSubClient` by Nick O'Leary — note: `MQTT_MAX_PACKET_SIZE` is set to 512 in
+- `PubSubClient` by Nick O'Leary — note: `MQTT_MAX_PACKET_SIZE` is set to 768 in
   `mqttConnection.h` (before the library include) to accommodate HA
   discovery payloads; the library default of 256 bytes silently truncates
   larger publishes
