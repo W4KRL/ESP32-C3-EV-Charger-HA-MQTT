@@ -1,6 +1,7 @@
 /**
  * @file mqttConnection.h
- * @brief MQTT client interface for Home Assistant discovery and telemetry publishing.
+ * @brief MQTT client interface for Home Assistant discovery and telemetry
+ * publishing.
  *
  * @details
  * Declares the shared PubSubClient instance and the functions that connect to
@@ -19,12 +20,12 @@
 
 #pragma once
 
-#include "config.h"               // credentials and parameters
-#define MQTT_MAX_PACKET_SIZE 512  // define before including PubSubClient
-#include <PubSubClient.h>         // MQTT library
+#include "config.h"              // credentials and parameters
+#define MQTT_MAX_PACKET_SIZE 768 // define before including PubSubClient
+#include <PubSubClient.h>        // MQTT library
 
-extern PubSubClient mqtt;     // MQTT client instance defined in mqttConnection.cpp
+extern PubSubClient mqtt; // MQTT client instance defined in mqttConnection.cpp
 
-bool mqttConnect();       // connect to MQTT broker
-void publishReading();    // publishes global reading to MQTT broker
-void publishDiscovery();  // publishes HA MQTT auto-discovery config topics
+bool mqttConnect();      // connect to MQTT broker
+void publishReading();   // publishes global reading to MQTT broker
+void publishDiscovery(); // publishes HA MQTT auto-discovery config topics
