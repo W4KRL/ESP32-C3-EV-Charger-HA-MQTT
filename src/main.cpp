@@ -39,8 +39,7 @@
  * @date 2026.07.26
  */
 
-// ─── Libraries
-// ────────────────────────────────────────────────────────────────
+// ─── Libraries ──────────────────────────────────────────────────────────────
 #include "alertFlash.h"     // Bicolor LED status and alert patterns
 #include "config.h"         // Credentials, tunable parameters, and globals
 #include "measurement.h"    // ADC sampling and electrical parameter calculation
@@ -54,11 +53,10 @@
 // Ticker controlling adaptive publishReading() timing
 TickTwo publishTicker(publishReading, IDLE_INTERVAL_MS, 0, MILLIS);
 
-// ─── Setup
-// ────────────────────────────────────────────────────────────────────
+// ─── Setup ──────────────────────────────────────────────────────────────────
 void setup() {
-  Serial.begin(115200); // Initialize USB serial
-  delay(1000);          // Allow ESP32-C3 USB enumeration
+  Serial.begin(115200);                         // Initialize USB serial
+  delay(1000);                                  // Allow ESP32-C3 USB enumeration
   Serial.println("\n=== AC Power Monitor ==="); // Startup banner
   initBicolorLed();                             // Prepare LED subsystem
 
@@ -77,8 +75,7 @@ void setup() {
 #endif
 } // setup()
 
-// ─── Loop
-// ─────────────────────────────────────────────────────────────────────
+// ─── Loop ───────────────────────────────────────────────────────────────────
 void loop() {
 #ifdef CALIBRATE
   static unsigned long lastCalMs = 0;
@@ -101,8 +98,7 @@ void loop() {
   updateBicolorLed();  // LED flash pattern updates
   measure();           // Continuous ADC sampling
 
-  bool isActive =
-      (reading.irms >= LOAD_THRESHOLD_A); // Charging state detection
+  bool isActive = (reading.irms >= LOAD_THRESHOLD_A); // Charging state detection
   setBicolorLedState(isActive ? LED_GREEN_SLOW : LED_GREEN_STEADY);
 
   static bool wasActive = false;
