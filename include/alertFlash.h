@@ -35,8 +35,7 @@ enum LedState : uint8_t {
 };
 // clang-format on
 
-
-/// Configure the green/red LED pins as outputs. Call once from setup().
+// Configure the green/red LED pins as outputs. Call once from setup().
 void initBicolorLed();
 
 /**
