@@ -24,18 +24,18 @@
 
 #include "secrets.h" // WIFI_SSID, WIFI_PASS, MQTT_HOST, MQTT_USER, MQTT_PASS, OTA_PASSWORD
 
-static const char *FW_VERSION = "1.0.10"; // bump on each release
+static const char *FW_VERSION = "1.3.2"; // bump on each release
 // 1.0.0 2026.07.06 initial commit
 // 1.0.1 2026.07.06 minor cleanup
 // 1.0.2 2026.07.07 rescaled CURRENT_SCALE due to error in CT turns
-// 1.0.3 2026.07.08 added state_class to SensorDef for rssi
-// 1.0.4 2026.07.08 returnd CURRENT_SCALE=0.03456f for CT 4-turns
-// 1.0.5 2026.07.09 add LED mode indications
-// 1.0.6 2026.07.10 moved measure() to measurement module
-// 1.0.7 2026.07.14 improve WiFi connection loss response
-// 1.0.8 2026.07.22 use TickTwo to drive publishReading and LED flashes, change
-// 1.0.9 2026.07.24 fix micros() rollover in measure()
-// 1.0.10 2026.07.26 reduce CURRENT_DEADBAND_A from 0.3f to 0.1f
+// 1.1.0 2026.07.08 added state_class to SensorDef for rssi
+// 1.1.1 2026.07.08 returnd CURRENT_SCALE=0.03456f for CT 4-turns
+// 1.2.0 2026.07.09 add LED mode indications
+// 1.2.1 2026.07.10 moved measure() to measurement module
+// 1.2.2 2026.07.14 improve WiFi connection loss response
+// 1.3.0 2026.07.22 use TickTwo to drive publishReading and LED flashes, change
+// 1.3.1 2026.07.24 fix micros() rollover in measure()
+// 1.3.2 2026.08.01 reduce CURRENT_DEADBAND_A from 0.3f to 0.1f
 
 // ─── Wi-Fi Timeout ──────────────────────────────────────────────────────────
 static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000; // 15 s WiFi connect timeout
