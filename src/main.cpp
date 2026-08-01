@@ -63,15 +63,15 @@ void setup() {
 #ifdef CALIBRATE                    // Calibration mode selected at compile time
   setBicolorLedState(LED_RED_SLOW); // Indicate calibration mode
 #else                               // Normal operating mode
-  wifiConnect();                        // Establish Wi-Fi connection
-  initOTA();                            // Enable OTA update handling
-  mqtt.setServer(MQTT_HOST, MQTT_PORT); // Configure MQTT broker
-  mqtt.setKeepAlive(MQTT_KEEPALIVE_S);  // Keep-alive interval
-  mqtt.setBufferSize(
-      MQTT_MAX_PACKET_SIZE); // Larger buffer for HA discovery payloads
-  measure();                 // Prime ADC offset values before first publish
-  mqttConnect();             // Connect to Home Assistant MQTT
-  publishTicker.start();     // Begin periodic publishing at idle rate
+  wifiConnect();                            // Establish Wi-Fi connection
+  initOTA();                                // Enable OTA update handling
+  mqtt.setServer(MQTT_HOST, MQTT_PORT);     // Configure MQTT broker
+  mqtt.setKeepAlive(MQTT_KEEPALIVE_S);      // Keep-alive interval
+  mqtt.setBufferSize(MQTT_MAX_PACKET_SIZE); // Larger buffer for HA discovery payloads
+  measure();                                // Prime ADC offset values before first publish
+  mqttConnect();                            // Connect to Home Assistant
+  publishReading();                         // Immediate publish so fw version confirms on every boot
+  publishTicker.start();                    // Start ticker at idle interval
 #endif
 } // setup()
 

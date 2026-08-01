@@ -29,7 +29,7 @@ static const char *FW_VERSION = "1.3.2"; // bump on each release
 // 1.0.1 2026.07.06 minor cleanup
 // 1.0.2 2026.07.07 rescaled CURRENT_SCALE due to error in CT turns
 // 1.1.0 2026.07.08 added state_class to SensorDef for rssi
-// 1.1.1 2026.07.08 returnd CURRENT_SCALE=0.03456f for CT 4-turns
+// 1.1.1 2026.07.08 returned CURRENT_SCALE=0.03456f for CT 4-turns
 // 1.2.0 2026.07.09 add LED mode indications
 // 1.2.1 2026.07.10 moved measure() to measurement module
 // 1.2.2 2026.07.14 improve WiFi connection loss response
