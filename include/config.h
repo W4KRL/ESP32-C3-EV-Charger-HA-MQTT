@@ -3,11 +3,11 @@
  * @brief Tunable parameters and shared data types for the AC power monitor.
  *
  * @details
- * Centralizes non-sensitive credentials, specific build configuration: 
- * MQTT topic/client naming, OTA hostname, ADC sampling and adaptive-reporting parameters,
- * voltage/current calibration constants (see the Calibration section below
- * for derivation and bench procedure), pin assignments, and the PowerReading
- * struct shared across ac_monitor.ino and mqttConnection.cpp.
+ * Centralizes non-sensitive credentials, specific build configuration:
+ * MQTT topic/client naming, OTA hostname, ADC sampling and adaptive-reporting
+ * parameters, voltage/current calibration constants (see the Calibration
+ * section below for derivation and bench procedure), pin assignments, and the
+ * PowerReading struct shared across ac_monitor.ino and mqttConnection.cpp.
  *
  * @warning Wi-Fi, MQTT, and OTA credentials live in secrets.h, which is
  * gitignored and must be created locally from secrets.h.example below.
@@ -22,9 +22,9 @@
 
 #pragma once
 
-#include "secrets.h"  // WIFI_SSID, WIFI_PASS, MQTT_HOST, MQTT_USER, MQTT_PASS, OTA_PASSWORD
+#include "secrets.h" // WIFI_SSID, WIFI_PASS, MQTT_HOST, MQTT_USER, MQTT_PASS, OTA_PASSWORD
 
-static const char* FW_VERSION = "1.0.9";  // bump on each release
+static const char *FW_VERSION = "1.0.10"; // bump on each release
 // 1.0.0 2026.07.06 initial commit
 // 1.0.1 2026.07.06 minor cleanup
 // 1.0.2 2026.07.07 rescaled CURRENT_SCALE due to error in CT turns
@@ -33,51 +33,53 @@ static const char* FW_VERSION = "1.0.9";  // bump on each release
 // 1.0.5 2026.07.09 add LED mode indications
 // 1.0.6 2026.07.10 moved measure() to measurement module
 // 1.0.7 2026.07.14 improve WiFi connection loss response
-// 1.0.8 2026.07.22 use TickTwo to drive publishReading and LED flashes, change OTA_HOSTNAME
+// 1.0.8 2026.07.22 use TickTwo to drive publishReading and LED flashes, change
 // 1.0.9 2026.07.24 fix micros() rollover in measure()
+// 1.0.10 2026.07.26 reduce CURRENT_DEADBAND_A from 0.3f to 0.1f
 
-// --- Wi-Fi Timeout ------------------------------------------------------------
-static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000;  // 15 s WiFi connect timeout
+// ─── Wi-Fi Timeout ──────────────────────────────────────────────────────────
+static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000; // 15 s WiFi connect timeout
 
-// ─── MQTT ─────────────────────────────────────────────────────────────────────
+// ─── MQTT ───────────────────────────────────────────────────────────────────
 #define MQTT_CLIENT_ID "ac_monitor_01"
 #define MQTT_TOPIC_POWER "home/power/ac_monitor/state"
 #define MQTT_TOPIC_STATUS "home/power/ac_monitor/status"
 static constexpr int MQTT_PORT = 1883;
-static constexpr unsigned long MQTT_CONNECT_TIMEOUT_MS = 15000;  // 15 s MQTT connect timeout
-static constexpr int MQTT_KEEPALIVE_S = 60;                      // seconds between activity pings
-inline unsigned long lastSuccessfulPublish = 0;                  // defined in mqttConnection.cpp. make it global here
+static constexpr unsigned long MQTT_CONNECT_TIMEOUT_MS = 15000; // 15 s MQTT connect timeout
+static constexpr int MQTT_KEEPALIVE_S = 60;                     // seconds between activity pings
+inline unsigned long lastSuccessfulPublish = 0;                 // defined in mqttConnection.cpp. make it global here
 
-// ─── OTA ──────────────────────────────────────────────────────────────────────
+// ─── OTA ────────────────────────────────────────────────────────────────────
 #define OTA_HOSTNAME "ac-monitor-01"
 
-// ─── Electrical Parameters ────────────────────────────────────────────────────
-static constexpr float LINE_FREQUENCY = 60.0f;  // Hz – use local utility frequency
-static constexpr int SAMPLE_CYCLES = 50;        // number of cycles per measurement burst (~833ms @ 60 Hz)
-static constexpr int SAMPLE_INTERVAL_US = 400;  // microseconds between ADC samples (~2500 samples/sec, 41/cycle)
+// ─── Electrical Parameters ──────────────────────────────────────────────────
+static constexpr float LINE_FREQUENCY = 60.0f; // Hz – use local utility frequency
+static constexpr int SAMPLE_CYCLES = 50;       // number of cycles per measurement burst (~833ms @ 60 Hz)
+static constexpr int SAMPLE_INTERVAL_US = 400; // microseconds between ADC samples (~2500 samples/sec, 41/cycle)
 
-// ─── Adaptive reporting ───────────────────────────────────────────────────────
-static constexpr float LOAD_THRESHOLD_A = 1.0f;                       // amps — switches report interval
-static constexpr unsigned long IDLE_INTERVAL_MS = 10UL * 60 * 1000;   // 10 min when I < threshold
-static constexpr unsigned long ACTIVE_INTERVAL_MS = 1UL * 60 * 1000;  // 60 sec when I >= threshold
-// MQTT_LIVENESS_TIMEOUT_MS must exceed the longest gap between publishes (idle interval), plus a safety margin
+// ─── Adaptive reporting ─────────────────────────────────────────────────────
+static constexpr float LOAD_THRESHOLD_A = 1.0f;                      // amps — switches report interval
+static constexpr unsigned long IDLE_INTERVAL_MS = 10UL * 60 * 1000;  // 10 min when I < threshold
+static constexpr unsigned long ACTIVE_INTERVAL_MS = 1UL * 60 * 1000; // 60 sec when I >= threshold
+// MQTT_LIVENESS_TIMEOUT_MS must exceed the longest gap between publishes (idle
+// interval), plus a safety margin
 static constexpr unsigned long MQTT_LIVENESS_TIMEOUT_MS = IDLE_INTERVAL_MS + 60UL * 1000;
-static constexpr float CURRENT_DEADBAND_A = 0.3f;  // treat current & power as zero to mask noise
+static constexpr float CURRENT_DEADBAND_A = 0.1f; // treat current & power as zero to mask noise
 
-// ─── Device Connections ───────────────────────────────────────────────────────
-static constexpr int PIN_VOLTAGE = 0;    // ADC1_CH0 from ZMPT101B voltage sense module
-static constexpr int PIN_CURRENT = 3;    // ADC1_CH3 from Current Transformer
-static constexpr int PIN_LED_RED = 5;    // GPIO5 bicolor LED
-static constexpr int PIN_LED_GREEN = 6;  // GPIO6 bicolor LED
+// ─── Device Connections ─────────────────────────────────────────────────────
+static constexpr int PIN_VOLTAGE = 0;   // ADC1_CH0 from ZMPT101B voltage sense module
+static constexpr int PIN_CURRENT = 3;   // ADC1_CH3 from Current Transformer
+static constexpr int PIN_LED_RED = 5;   // GPIO5 bicolor LED
+static constexpr int PIN_LED_GREEN = 6; // GPIO6 bicolor LED
 
-// ─── Calibration ──────────────────────────────────────────────────────────────
+// ─── Calibration ────────────────────────────────────────────────────────────
 //  #define CALIBRATE  // uncomment for calibration
 //
 // NOTE: Use CALIBRATE only on a bench top with USB connection to the PC.
 //
-const unsigned long CAL_INTERVAL_MS = 10 * 1000;  // interval between calibration output
-static constexpr float VOLTAGE_SCALE = 1.0f;      // ← MUST calibrate before use
-static constexpr float CURRENT_SCALE = 0.03456f;  // ← MUST calibrate before use
+const unsigned long CAL_INTERVAL_MS = 10 * 1000; // interval between calibration output
+static constexpr float VOLTAGE_SCALE = 1.0f;     // ← MUST calibrate before use
+static constexpr float CURRENT_SCALE = 0.03456f; // ← MUST calibrate before use
 // analogReadMilliVolts() returns calibrated mV (0–3100 mV at ADC_11db).
 // These scales convert mV-rms at the ADC pin to real-world units.
 //
@@ -100,19 +102,20 @@ static constexpr float CURRENT_SCALE = 0.03456f;  // ← MUST calibrate before u
 //   4. VOLTAGE_SCALE = DMM_Vrms / vrms_mv
 //   5. CURRENT_SCALE = DMM_Irms / irms_mv
 
-// ─── Data Types ───────────────────────────────────────────────────────────────
+// ─── Data Types ─────────────────────────────────────────────────────────────
 // AC power measurement – updated by measure(), published by publishReading()
 struct PowerReading {
-  float vrms;       // RMS voltage (V)
-  float irms;       // RMS current (A)
-  float va;         // Apparent power (VA)
-  float realPower;  // Real power (W)
-  float pf;         // Power factor (0.0 - 1.0)
+  float vrms;      // RMS voltage (V)
+  float irms;      // RMS current (A)
+  float va;        // Apparent power (VA)
+  float realPower; // Real power (W)
+  float pf;        // Power factor (0.0 - 1.0)
 };
 
-inline PowerReading reading;  // single global instance — defined here, used everywhere config.h is included
+inline PowerReading reading; // single global instance — defined here, used
+                             // everywhere config.h is included
 
-// ─── secrets.h template ───────────────────────────────────────────────────────
+// ─── secrets.h template ─────────────────────────────────────────────────────
 /**
  * @brief Template for secrets.h — create this file locally; do not commit it.
  *
