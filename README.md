@@ -41,7 +41,7 @@ This organization keeps the sketch folder tidy, supports modular code, works sea
 ## Documentation
 
 - [Schematic As-Built](assets/schematic/ac_monitor_schematic.pdf)
-- [Schematic Future] (assets/schematic/ac_monitor_future_build_schematic.pdf)
+- [Schematic Future](assets/schematic/ac_monitor_future_build_schematic.pdf)
 - [Stripboard layout](assets/stripboard/ac_monitor_stripboard.pdf)
 - [Parts list](/assets/parts_list.md)
 - [Build photos](assets/photos/)
