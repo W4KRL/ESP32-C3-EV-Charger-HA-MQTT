@@ -4,11 +4,11 @@ The ESP32-C3 EV Charger is an MQTT-based AC power monitor for a 240 Vac EV charg
 built on an ESP32-C3 SupeMini. It publishes voltage, current, real power, apparent power (VA),
 and power factor to Home Assistant via MQTT discovery.
 
-### Project File Organization
+## Project File Organization
 
 This project uses a structured layout that keeps code, libraries, documentation, and hardware references cleanly separated. Arduino IDE 2.x compiles all source files in `src/` and includes headers from `include/`, even though these folders are not shown in the IDE’s file tree.
 
-```
+```text
 MyProject/
 ├── MyProject.ino        # Main sketch entry point
 ├── src/                 # All .cpp implementation files
@@ -40,7 +40,8 @@ This organization keeps the sketch folder tidy, supports modular code, works sea
 
 ## Documentation
 
-- [Schematic](assets/schematic/ac_monitor_schematic.pdf)
+- [Schematic As-Built](assets/schematic/ac_monitor_schematic.pdf)
+- [Schematic Future] (assets/schematic/ac_monitor_future_build_schematic.pdf)
 - [Stripboard layout](assets/stripboard/ac_monitor_stripboard.pdf)
 - [Parts list](/assets/parts_list.md)
 - [Build photos](assets/photos/)
