@@ -36,7 +36,7 @@
  *    updateBicolorLed().
  *
  * @author Karl Berger with Claude
- * @date 2026.07.26
+ * @date 2026.08.06
  */
 
 // ─── Libraries ──────────────────────────────────────────────────────────────

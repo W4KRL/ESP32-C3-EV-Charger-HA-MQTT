@@ -17,7 +17,7 @@
  * see the Calibration section for the bench procedure.
  *
  * @author Karl Berger with Claude
- * @date 2026.07.24
+ * @date 2026.08.06
  */
 
 #pragma once
