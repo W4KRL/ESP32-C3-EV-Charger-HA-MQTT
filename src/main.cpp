@@ -68,7 +68,9 @@ void setup() {
   mqtt.setServer(MQTT_HOST, MQTT_PORT);     // Configure MQTT broker
   mqtt.setKeepAlive(MQTT_KEEPALIVE_S);      // Keep-alive interval
   mqtt.setBufferSize(MQTT_MAX_PACKET_SIZE); // Larger buffer for HA discovery payloads
-  measure();                                // Prime ADC offset values before first publish
+  delay(300);                               // Allow 5VDC to stabilize before ADC sampling
+  measure();                                // Priming pass: garbage output, but this SETS offsetV/offsetI
+  measure();                                // Second pass: now uses the real offsets → valid AC-only reading
   mqttConnect();                            // Connect to Home Assistant
   publishReading();                         // Immediate publish so fw version confirms on every boot
   publishTicker.start();                    // Start ticker at idle interval

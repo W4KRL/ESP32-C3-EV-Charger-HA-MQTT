@@ -24,7 +24,7 @@
 
 #include "secrets.h" // WIFI_SSID, WIFI_PASS, MQTT_HOST, MQTT_USER, MQTT_PASS, OTA_PASSWORD
 
-static const char *FW_VERSION = "1.3.2"; // bump on each release
+static const char *FW_VERSION = "1.3.3"; // bump on each release
 // 1.0.0 2026.07.06 initial commit
 // 1.0.1 2026.07.06 minor cleanup
 // 1.0.2 2026.07.07 rescaled CURRENT_SCALE due to error in CT turns
@@ -36,6 +36,7 @@ static const char *FW_VERSION = "1.3.2"; // bump on each release
 // 1.3.0 2026.07.22 use TickTwo to drive publishReading and LED flashes, change
 // 1.3.1 2026.07.24 fix micros() rollover in measure()
 // 1.3.2 2026.08.01 reduce CURRENT_DEADBAND_A from 0.3f to 0.1f
+// 1.3.3 2026.08.02 add double call to measure() in setup() to prime offsetV/offsetI before first valid reading
 
 // ─── Wi-Fi Timeout ──────────────────────────────────────────────────────────
 static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000; // 15 s WiFi connect timeout
