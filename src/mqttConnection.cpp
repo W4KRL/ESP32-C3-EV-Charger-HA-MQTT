@@ -9,14 +9,14 @@
  * Home Assistant MQTT discovery registration for all sensor entities.
  *
  * @author Karl Berger with Claude
- * @date 2026.07.14
+ * @date 2026.08.21
  */
 
-#include "mqttConnection.h"  // Self-header
-#include "config.h"          // Credentials and parameters
-#include <WiFi.h>            // Wi-Fi library
-#include <ArduinoJson.h>     // JSON library
-#include "alertFlash.h"      // Mode indications
+#include "mqttConnection.h" // Self-header
+#include "alertFlash.h"     // Bicolor LED status and alert patterns
+#include "config.h"         // Credentials and parameters
+#include <ArduinoJson.h>    // JSON library
+#include <WiFi.h>           // Wi-Fi library
 
 WiFiClient wifiClient;
 PubSubClient mqtt(wifiClient);
@@ -41,20 +41,20 @@ bool mqttConnect() {
                      MQTT_TOPIC_STATUS, /*willQoS=*/1, /*willRetain=*/true, "offline")) {
       Serial.println(" connected");
       mqtt.publish(MQTT_TOPIC_STATUS, "online", /*retain=*/true);
-      publishDiscovery();  // register sensors with HA on each connection
+      publishDiscovery(); // register sensors with HA on each connection
       setBicolorLedState(LED_GREEN_STEADY);
       return true;
     } else {
       Serial.printf(" failed rc=%d, retry 5s\n", mqtt.state());
       unsigned long retryStart = millis();
       while (millis() - retryStart < 5000) {
-        updateBicolorLed();  // sustain flash during retry wait
+        updateBicolorLed(); // sustain flash during retry wait
         delay(100);
       }
     }
   }
-  return true;  // unreachable, but keeps compiler happy re: all paths returning
-}  // mqttConnect()
+  return true; // unreachable, but keeps compiler happy re: all paths returning
+} // mqttConnect()
 
 void publishReading() {
   JsonDocument doc;
@@ -78,40 +78,38 @@ void publishReading() {
   } else {
     Serial.println(F("MQTT publish failed"));
   }
-}  // publishReading()
+} // publishReading()
 
 void publishDiscovery() {
   struct SensorDef {
-    const char* name;
-    const char* id;
-    const char* unit;
-    const char* deviceClass;
-    const char* icon;
-    const char* category;
-    const char* stateClass;
-    bool        forceUpdate;
+    const char *name;
+    const char *id;
+    const char *unit;
+    const char *deviceClass;
+    const char *icon;
+    const char *category;
+    const char *stateClass;
+    bool forceUpdate;
   };
 
   // clang-format off
 static const SensorDef sensors[] = {
-  { "AC Voltage",       "vrms",  "V",   "voltage",         nullptr,         nullptr,       "measurement", true  },
-  { "AC Current",       "irms",  "A",   "current",         nullptr,         nullptr,       "measurement", true  },
-  { "Real Power",       "watts", "W",   "power",           nullptr,         nullptr,       "measurement", false },
-  { "Apparent Power",   "va",    "VA",  nullptr,           "mdi:sine-wave", nullptr,       "measurement", false },
-  { "Power Factor",     "pf",    "",    "power_factor",    nullptr,         nullptr,       "measurement", false },
-  { "RSSI",              "rssi", "dBm", "signal_strength", nullptr,         "diagnostic",  "measurement", false },
-  { "WiFi BSSID",       "bssid", "",    nullptr,           "mdi:access-point-network", "diagnostic", nullptr, false },
-  { "Firmware Version", "fw",    "",    nullptr,           "mdi:chip",      "diagnostic",  nullptr, false },
+  { "AC Voltage",       "vrms",  "V",   "voltage",         nullptr,                    nullptr,       "measurement", true  },
+  { "AC Current",       "irms",  "A",   "current",         nullptr,                    nullptr,       "measurement", true  },
+  { "Real Power",       "watts", "W",   "power",           nullptr,                    nullptr,       "measurement", false },
+  { "Apparent Power",   "va",    "VA",  nullptr,           "mdi:sine-wave",            nullptr,       "measurement", false },
+  { "Power Factor",     "pf",    "",    "power_factor",    nullptr,                    nullptr,       "measurement", false },
+  { "RSSI",              "rssi", "dBm", "signal_strength", nullptr,                    "diagnostic",  "measurement", false },
+  { "WiFi BSSID",       "bssid", "",    nullptr,           "mdi:access-point-network", "diagnostic",   nullptr,      false },
+  { "Firmware",         "fw",    "",    nullptr,           "mdi:chip",                 "diagnostic",   nullptr,      false },
 };
   // clang-format on
 
-  Serial.printf("Buffer size: %d, Max packet: %d\n", mqtt.getBufferSize(), MQTT_MAX_PACKET_SIZE);  // ← add this line here, before the loop
+  Serial.printf("Buffer size: %d, Max packet: %d\n", mqtt.getBufferSize(), MQTT_MAX_PACKET_SIZE); // ← add this line here, before the loop
 
-  for (const auto& s : sensors) {
+  for (const auto &s : sensors) {
     char topic[128];
-    snprintf(topic, sizeof(topic),
-             "homeassistant/sensor/%s/%s/config",
-             MQTT_CLIENT_ID, s.id);
+    snprintf(topic, sizeof(topic), "homeassistant/sensor/%s/%s/config", MQTT_CLIENT_ID, s.id);
 
     JsonDocument doc;
     doc["name"] = s.name;
@@ -119,11 +117,16 @@ static const SensorDef sensors[] = {
     doc["state_topic"] = MQTT_TOPIC_POWER;
     doc["value_template"] = String("{{ value_json.") + s.id + " }}";
     doc["unit_of_measurement"] = s.unit;
-    if (s.deviceClass) doc["device_class"] = s.deviceClass;
-    if (s.icon) doc["icon"] = s.icon;
-    if (s.category) doc["entity_category"] = s.category;
-    if (s.stateClass) doc["state_class"] = s.stateClass;
-    if (s.forceUpdate) doc["force_update"] = true;
+    if (s.deviceClass)
+      doc["device_class"] = s.deviceClass;
+    if (s.icon)
+      doc["icon"] = s.icon;
+    if (s.category)
+      doc["entity_category"] = s.category;
+    if (s.stateClass)
+      doc["state_class"] = s.stateClass;
+    if (s.forceUpdate)
+      doc["force_update"] = true;
     doc["availability_topic"] = MQTT_TOPIC_STATUS;
     doc["payload_available"] = "online";
     doc["payload_not_available"] = "offline";
@@ -137,6 +140,6 @@ static const SensorDef sensors[] = {
     char buf[512];
     size_t len = serializeJson(doc, buf, sizeof(buf));
     bool ok = mqtt.publish(topic, buf, /*retain=*/true);
-    Serial.printf("Discovery: %s len=%d %s\n", topic, len, ok ? "OK" : "FAILED");  // ← replaces the old Serial.printf("Discovery: %s\n", topic);
+    Serial.printf("Discovery: %s len=%d %s\n", topic, len, ok ? "OK" : "FAILED"); // ← replaces the old Serial.printf("Discovery: %s\n", topic);
   }
-}  // publishDiscovery()
+} // publishDiscovery()
