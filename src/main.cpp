@@ -1,42 +1,42 @@
 /**
  * @file ESP32-C3-EV-Charger-HA-MQTT.ino
- * @brief Main control module for the ESP32‑C3 AC power monitor.
+ * @brief Main control module for the ESP32-C3 AC power monitor.
  *
  * @details
- * Coordinates all major subsystems — ADC sampling and RMS/power computation,
- * Wi‑Fi and OTA services, MQTT discovery/telemetry for Home Assistant, and the
- * bicolor LED status indicator — and defines the overall setup/loop behavior.
+ * Coordinates all major subsystems: ADC sampling and RMS/power computation,
+ * Wi-Fi and OTA services, MQTT discovery/telemetry for Home Assistant, and
+ * the bicolor LED status indicator. Defines the overall setup/loop behavior.
  *
- * The firmware supports two compile‑time modes selected via CALIBRATE in
- * config.h:
+ * The firmware supports two compile-time modes, selected by defining
+ * CALIBRATE in config.h:
  *
  *  - **Normal mode:**
- *    Connects to Wi‑Fi and MQTT, publishes measurements at an interval that
- *    adapts to load (LOAD_THRESHOLD_A), and reflects idle/active charging
- *    states on the LED (steady green = idle, slow green = charging).
+ *    Connects to Wi-Fi and MQTT, publishes measurements at an interval that
+ *    adapts to load (LOAD_THRESHOLD_A), and reflects idle/charging state on
+ *    the LED (steady green = idle, slow green = charging).
  *
  *  - **Calibration mode:**
- *    Disables Wi‑Fi and MQTT, outputs raw and scaled readings to serial every
- *    CAL_INTERVAL_MS for bench calibration, and flashes the LED red to indicate
- *    calibration activity.
+ *    Disables Wi-Fi and MQTT, streams raw and scaled readings to serial
+ *    every CAL_INTERVAL_MS for bench calibration, and flashes the LED red
+ *    to indicate calibration activity.
  *
- * The loop() function remains fully non‑blocking. Measurement, MQTT servicing,
- * and ArduinoOTA handling run continuously. Two independent TickTwo objects
- * manage scheduled tasks without delay():
+ * loop() is fully non-blocking: measurement, MQTT servicing, and
+ * ArduinoOTA handling all run every pass. Two independent TickTwo objects
+ * schedule periodic work without delay():
  *
  *  - **publishTicker:**
- *    Triggers publishReading() at either IDLE_INTERVAL_MS or ACTIVE_INTERVAL_MS
- *    depending on load. When the charging state changes, loop() updates the
- *    interval, restarts the ticker to realign timing with the transition, and
- *    immediately publishes a reading so the state change is reported without
- *    delay.
+ *    Fires publishReading() at IDLE_INTERVAL_MS or ACTIVE_INTERVAL_MS,
+ *    depending on load. On a charging-state transition, loop() updates the
+ *    interval, restarts the ticker so its timing realigns with the
+ *    transition, and publishes a reading immediately so the state change
+ *    is reported without waiting for the next tick.
  *
- *  - **slowFlash/fastFlash (alertFlash.cpp):**
- *    Drive the LED’s 500 ms and 150 ms flash patterns, updated via
- *    updateBicolorLed().
+ *  - **slowFlash / fastFlash (alertFlash.cpp):**
+ *    Drive the LED's 500 ms and 150 ms flash patterns; advanced each pass
+ *    via updateBicolorLed().
  *
  * @author Karl Berger with Claude
- * @date 2026.08.06
+ * @date 2026.08.21
  */
 
 // ─── Libraries ──────────────────────────────────────────────────────────────
@@ -50,12 +50,12 @@
 #include <TickTwo.h>        // Non-blocking scheduler by Stefan Staub
 #include <WiFi.h>           // Wi-Fi connectivity
 
-// Ticker controlling adaptive publishReading() timing
+// Ticker that drives adaptive-interval publishReading() calls
 TickTwo publishTicker(publishReading, IDLE_INTERVAL_MS, 0, MILLIS);
 
 // ─── Setup ──────────────────────────────────────────────────────────────────
 void setup() {
-  Serial.begin(115200);                         // Initialize USB serial
+  Serial.begin(115200);                         // Start USB serial
   delay(1000);                                  // Allow ESP32-C3 USB enumeration
   Serial.println("\n=== AC Power Monitor ==="); // Startup banner
   initBicolorLed();                             // Prepare LED subsystem
@@ -66,14 +66,14 @@ void setup() {
   wifiConnect();                            // Establish Wi-Fi connection
   initOTA();                                // Enable OTA update handling
   mqtt.setServer(MQTT_HOST, MQTT_PORT);     // Configure MQTT broker
-  mqtt.setKeepAlive(MQTT_KEEPALIVE_S);      // Keep-alive interval
-  mqtt.setBufferSize(MQTT_MAX_PACKET_SIZE); // Larger buffer for HA discovery payloads
-  delay(300);                               // Allow 5VDC to stabilize before ADC sampling
-  measure();                                // Priming pass: garbage output, but this SETS offsetV/offsetI
-  measure();                                // Second pass: now uses the real offsets → valid AC-only reading
+  mqtt.setKeepAlive(MQTT_KEEPALIVE_S);      // Set keep-alive interval
+  mqtt.setBufferSize(MQTT_MAX_PACKET_SIZE); // Enlarge buffer for HA discovery payloads
+  delay(300);                               // Let the 5 V rail settle before ADC sampling
+  measure();                                // First pass: seeds offsetV/offsetI (reading is invalid)
+  measure();                                // Second pass: uses the real offsets, so reading is now valid AC-only
   mqttConnect();                            // Connect to Home Assistant
-  publishReading();                         // Immediate publish so fw version confirms on every boot
-  publishTicker.start();                    // Start ticker at idle interval
+  publishReading();                         // Publish immediately so fw version is confirmed on every boot
+  publishTicker.start();                    // Start ticker at the idle interval
 #endif
 } // setup()
 
@@ -81,8 +81,8 @@ void setup() {
 void loop() {
 #ifdef CALIBRATE
   static unsigned long lastCalMs = 0;
-  updateBicolorLed(); // Maintain LED_RED_SLOW flash pattern
-  measure();          // Continuous sampling
+  updateBicolorLed(); // Advance the LED_RED_SLOW flash pattern
+  measure();          // Sample continuously
   if (millis() - lastCalMs >= CAL_INTERVAL_MS) {
     lastCalMs = millis();
     Serial.printf("vrms_mv=%.2f irms_mv=%.2f vrms=%.2f irms=%.2f\n", vrms_mv,
@@ -92,32 +92,32 @@ void loop() {
 #endif
 
   if (WiFi.status() != WL_CONNECTED)
-    wifiConnect(); // Auto-reconnect Wi-Fi
+    wifiConnect(); // Reconnect Wi-Fi if dropped
   if (!mqtt.connected())
-    mqttConnect();     // Auto-reconnect MQTT
-  mqtt.loop();         // MQTT traffic and callbacks
-  ArduinoOTA.handle(); // OTA service handler
-  updateBicolorLed();  // LED flash pattern updates
-  measure();           // Continuous ADC sampling
+    mqttConnect();     // Reconnect MQTT if dropped
+  mqtt.loop();         // Service MQTT traffic and callbacks
+  ArduinoOTA.handle(); // Service pending OTA requests
+  updateBicolorLed();  // Advance the LED flash pattern
+  measure();           // Sample continuously
 
-  bool isActive = (reading.irms >= LOAD_THRESHOLD_A); // Charging state detection
+  bool isActive = (reading.irms >= LOAD_THRESHOLD_A); // True when load current indicates charging
   setBicolorLedState(isActive ? LED_GREEN_SLOW : LED_GREEN_STEADY);
 
   static bool wasActive = false;
   if (isActive != wasActive) {
     unsigned long newInterval =
         isActive ? ACTIVE_INTERVAL_MS : IDLE_INTERVAL_MS;
-    publishTicker.interval(newInterval); // Update publish interval
+    publishTicker.interval(newInterval); // Switch to the interval for the new state
     publishTicker.stop();                // Reset ticker timing on state change
-    publishTicker.start();               // Restart with new interval
-    publishReading();                    // Immediate publish on transition
-    wasActive = isActive;                // Track previous state
+    publishTicker.start();               // Restart with the new interval
+    publishReading();                    // Publish immediately on the transition
+    wasActive = isActive;                // Remember state for next comparison
   }
 
-  publishTicker.update(); // Trigger publishReading() when ticker fires
+  publishTicker.update(); // Call publishReading() when the ticker fires
 
   if (millis() - lastSuccessfulPublish > MQTT_LIVENESS_TIMEOUT_MS) {
-    WiFi.disconnect(); // Force reconnect sequence if MQTT stalls
+    WiFi.disconnect(); // Force a reconnect sequence if MQTT has stalled
     wifiConnect();
   }
 } // loop()
