@@ -24,7 +24,7 @@
 
 #include "secrets.h" // WIFI_SSID, WIFI_PASS, MQTT_HOST, MQTT_USER, MQTT_PASS, OTA_PASSWORD
 
-static const char *FW_VERSION = "1.3.3"; // bump on each release
+static const char *FW_VERSION = "1.3.4"; // bump on each release
 // 1.0.0 2026.07.06 initial commit
 // 1.0.1 2026.07.06 minor cleanup
 // 1.0.2 2026.07.07 rescaled CURRENT_SCALE due to error in CT turns
@@ -37,6 +37,7 @@ static const char *FW_VERSION = "1.3.3"; // bump on each release
 // 1.3.1 2026.07.24 fix micros() rollover in measure()
 // 1.3.2 2026.08.01 reduce CURRENT_DEADBAND_A from 0.3f to 0.1f
 // 1.3.3 2026.08.02 add double call to measure() in setup() to prime offsetV/offsetI before first valid reading
+// 1.3.4 2026.08.21 add firmware version to MQTT discovery and telemetry
 
 // ─── Wi-Fi Timeout ──────────────────────────────────────────────────────────
 static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000; // 15 s WiFi connect timeout
@@ -55,8 +56,8 @@ inline unsigned long lastSuccessfulPublish = 0;                 // defined in mq
 
 // ─── Electrical Parameters ──────────────────────────────────────────────────
 static constexpr float LINE_FREQUENCY = 60.0f; // Hz – use local utility frequency
-static constexpr int SAMPLE_CYCLES = 50;       // number of cycles per measurement burst (~833ms @ 60 Hz)
-static constexpr int SAMPLE_INTERVAL_US = 400; // microseconds between ADC samples (~2500 samples/sec, 41/cycle)
+static constexpr int SAMPLE_CYCLES = 15;       // number of cycles per measurement burst (250 ms @ 60 Hz)
+static constexpr int SAMPLE_INTERVAL_US = 400; // microseconds between ADC samples (2500 samples/sec, ~41.67/cycle)
 
 // ─── Adaptive reporting ─────────────────────────────────────────────────────
 static constexpr float LOAD_THRESHOLD_A = 1.0f;                      // amps — switches report interval
