@@ -37,7 +37,7 @@ static const char *FW_VERSION = "1.3.4"; // bump on each release
 // 1.3.1 2026.07.24 fix micros() rollover in measure()
 // 1.3.2 2026.08.01 reduce CURRENT_DEADBAND_A from 0.3f to 0.1f
 // 1.3.3 2026.08.02 add double call to measure() in setup() to prime offsetV/offsetI before first valid reading
-// 1.3.4 2026.08.21 add firmware version to MQTT discovery and telemetry
+// 1.3.4 2026.08.21 add firmware version to MQTT discovery and telemetry, reduce SAMPLE_CYCLES to 15
 
 // ─── Wi-Fi Timeout ──────────────────────────────────────────────────────────
 static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000; // 15 s WiFi connect timeout
