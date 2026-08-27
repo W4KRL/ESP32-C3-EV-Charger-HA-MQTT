@@ -24,7 +24,7 @@
 
 #include "secrets.h" // WIFI_SSID, WIFI_PASS, MQTT_HOST, MQTT_USER, MQTT_PASS, OTA_PASSWORD
 
-static const char *FW_VERSION = "1.3.4"; // bump on each release
+static const char *FW_VERSION = "1.4.0"; // bump on each release
 // 1.0.0 2026.07.06 initial commit
 // 1.0.1 2026.07.06 minor cleanup
 // 1.0.2 2026.07.07 rescaled CURRENT_SCALE due to error in CT turns
@@ -38,6 +38,7 @@ static const char *FW_VERSION = "1.3.4"; // bump on each release
 // 1.3.2 2026.08.01 reduce CURRENT_DEADBAND_A from 0.3f to 0.1f
 // 1.3.3 2026.08.02 add double call to measure() in setup() to prime offsetV/offsetI before first valid reading
 // 1.3.4 2026.08.21 add firmware version to MQTT discovery and telemetry, reduce SAMPLE_CYCLES to 15
+// 1.4.0 2026.08.27 update parameters for new hardware build
 
 // ─── Wi-Fi Timeout ──────────────────────────────────────────────────────────
 static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000; // 15 s WiFi connect timeout
@@ -69,10 +70,10 @@ static constexpr unsigned long MQTT_LIVENESS_TIMEOUT_MS = IDLE_INTERVAL_MS + 60U
 static constexpr float CURRENT_DEADBAND_A = 0.1f; // treat current & power as zero to mask noise
 
 // ─── Device Connections ─────────────────────────────────────────────────────
-static constexpr int PIN_VOLTAGE = 0;   // ADC1_CH0 from ZMPT101B voltage sense module
-static constexpr int PIN_CURRENT = 3;   // ADC1_CH3 from Current Transformer
-static constexpr int PIN_LED_RED = 5;   // GPIO5 bicolor LED
-static constexpr int PIN_LED_GREEN = 6; // GPIO6 bicolor LED
+static constexpr int PIN_VOLTAGE = 3;   // ADC1_CH0 from ZMPT101B voltage sense module
+static constexpr int PIN_CURRENT = 4;   // ADC1_CH3 from Current Transformer
+static constexpr int PIN_LED_RED = 0;   // GPIO5 bicolor LED red anode
+static constexpr int PIN_LED_GREEN = 1; // GPIO6 bicolor LED green anode
 
 // ─── Calibration ────────────────────────────────────────────────────────────
 //  #define CALIBRATE  // uncomment for calibration
@@ -81,8 +82,8 @@ static constexpr int PIN_LED_GREEN = 6; // GPIO6 bicolor LED
 //
 const unsigned long CAL_INTERVAL_MS = 10 * 1000; // interval between calibration output
 static constexpr float VOLTAGE_SCALE = 1.0f;     // ← MUST calibrate before use
-static constexpr float CURRENT_SCALE = 0.03456f; // ← MUST calibrate before use
-// analogReadMilliVolts() returns calibrated mV (0–3100 mV at ADC_11db).
+static constexpr float CURRENT_SCALE = 0.02257f; // ← MUST calibrate before use
+// analogReadMilliVolts() returns calibrated mV (150–2450 mV at ADC_11db).
 // These scales convert mV-rms at the ADC pin to real-world units.
 //
 // VOLTAGE_SCALE  =  V_mains_rms  /  V_adc_rms_mV
@@ -90,11 +91,11 @@ static constexpr float CURRENT_SCALE = 0.03456f; // ← MUST calibrate before us
 //            VOLTAGE_SCALE = 120.0 / 120.0 = 1.000
 //
 // CURRENT_SCALE  =  I_load_A_rms  /  V_adc_rms_mV
-//   Example: CT 750:1 21.7 Ohm burden (measured)
-//            20 Arms / 750 = 0.0267 Arms
-//            Vburden = 0.0267 Arms * 21.7 Ohms = 0.579 Vrms_mv
-//            CURRENT_SCALE = 20.0A / 0.579 mV / 1000 = 0.03456
-//   Simplified: CURRENT_SCALE = CTratio ÷ Rburden ÷ 1000
+//   Example: CT 1000:1, 1 turn through window, 44.3 Ohm burden
+//            CT current = 16 Arms / 1000 = 0.0160 Arms
+//            CT voltage = 0.0160 Arms * 44.3 Ohm = 0.7088 Vrms
+//            CURRENT_SCALE = 16.0A / 0.7088 mV / 1000 = 0.02257
+//   Simplified: CURRENT_SCALE = CTratio ÷ turns ÷ Rburden ÷ 1000
 //
 // Bench procedure:
 //   1. Uncomment #define CALIBRATE above
