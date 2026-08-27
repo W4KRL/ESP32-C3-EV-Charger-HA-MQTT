@@ -35,21 +35,28 @@
  * once at startup, before the first call to measure().
  *
  * @author Karl Berger with Claude
- * @date 2026.08.21
+ * @date 2026.08.25
  */
 
 // measurement.cpp
 #include "measurement.h" // Self header
-#include "config.h"      // Pin assignments, SAMPLE_CYCLES, LINE_FREQUENCY,
+#include "config.h"      // Pin assignments and rms parameters
 #include <Arduino.h>
-// SAMPLE_INTERVAL_US, VOLTAGE_SCALE, CURRENT_SCALE,
-// CURRENT_DEADBAND_A, reading (inline global)
 
 float vrms_mv = 0.0f; // Raw burst RMS voltage in mV (CALIBRATE mode only)
 float irms_mv = 0.0f; // Raw burst RMS current in mV (CALIBRATE mode only)
 
 void initADC() {
-  analogSetAttenuation(ADC_11db); // Widen ADC input range to ~0-3.3 V (non-burst, one-time setup)
+  // Set 12-bit resolution (0-4095 counts) for both ADC channels
+  analogReadResolution(12);
+
+  // 11 dB attenuation gives the widest input range (150-2450 mV per Espressif's datasheet)
+  // Attenuation is set globally for all ADC channels.
+  analogSetAttenuation(ADC_11db);
+  // Use analogReadMilliVolts() to obtain calibrated values in mV (150-2450 mV at ADC_11db)
+  // Bias each ADC with 1.3 V to place voltage and current signals at mid-range
+  // Restrict the maximum signal deviation by design to +/- 1.0 V relative to dc bias
+  // to keep signal in linear range
 } // initADC()
 
 // ─── Measurement ──────────────────────────────────────────────────────────────
@@ -66,8 +73,8 @@ void measure() {
   long count = 0;
   unsigned long startTime = micros();
   while ((micros() - startTime) < BURST_US) {
-    float v_mv = analogReadMilliVolts(PIN_VOLTAGE);
-    float i_mv = analogReadMilliVolts(PIN_CURRENT);
+    float v_mv = analogReadMilliVolts(PIN_VOLTAGE); // Calibrated millivolts from ZMPT101B voltage sense module
+    float i_mv = analogReadMilliVolts(PIN_CURRENT); // Calibrated millivolts from Current Transformer
 
     sumV += v_mv;
     sumI += i_mv;

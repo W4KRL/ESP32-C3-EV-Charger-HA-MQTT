@@ -1,8 +1,8 @@
 # ESP32-C3 EV Charger AC Power Monitor
 
-The ESP32-C3 EV Charger is an MQTT-based AC power monitor for a 240 Vac EV charging circuit,
+The **ESP32-C3 EV Charger** is an MQTT-based AC power monitor for a 240 Vac EV charging circuit,
 built on an ESP32-C3 SupeMini. It publishes voltage, current, real power, apparent power (VA),
-and power factor to Home Assistant via MQTT discovery.
+and power factor to **Home Assistant** via **MQTT** discovery.
 
 ## Project File Organization
 
@@ -26,16 +26,17 @@ This organization keeps the sketch folder tidy, supports modular code, works sea
 - **ESP32-C3 SuperMini** development board with USB adapter and 3.3 Vdc regulator
 - **ZMPT101B** voltage transformer module (5 V supply), for line voltage sensing
 - Resistor divider to center dc bias and low pass filter for the voltage channel
-- **Open-jaw current transformer**, 100 A, 3000:1, wired with 4 primary turns
-  for an effective ratio of 750:1 and maximum current of 25 A
-- Resistor divider to center dc bias, CT burden resistor, and low pass filter fot current channel
-- Both channels scale sensor outputs to the ESP32-C3's 0 to 3.3 V ADC range
+- **Current Transformer**, 50 A, 1000:1
+- Resistor divider to center dc bias, CT burden resistor, and low pass filter for current channel
+- Both channels scale sensor outputs to the ESP32-C3's lineR ADC range
 - **WX-DC12003** converter module provides 5 Vdc system power from the 240 Vac line
 - **Bi-Color LED** for for operating and failure mode indication
 - Stripboard construction, with high-voltage components physically grouped
   and separated from the low-voltage ESP32-C3/signal-conditioning section
+- At least two breaks are placed in each trace between low- and high-voltage circuits
 - **NEMA 6-20R** 205 Vac, 20 A receptacle for EVSE
-- **2-Gang PVC (Non-metallic) weatherproof Outlet Box** Hubbell Model #PDB77550GY
+- **2-Gang PVC (Non-metallic) weatherproof Outlet Box** 1/2-in Schedule 40, Schedule 80 PVC Hub
+  CANTEX Model #L5133380
 - **6-ft 12/3 SJTW Extension cord NEMA 6-20 R/R 20 A 250 V**
 
 ## Documentation
@@ -102,7 +103,7 @@ procedure.
 | Topic                                           | Purpose                          |
 | ----------------------------------------------- | -------------------------------- |
 | `home/power/ac_monitor/state`                   | JSON payload: vrms, irms, watts, |
-|                                                 | va, pf, rssi, fw, bssid          |
+|                                                 | va, pf, rssi, fw, bssid, mac     |
 | `home/power/ac_monitor/status`                  | `online` / `offline` (LWT)       |
 | `homeassistant/sensor/ac_monitor_01/.../config` | HA discovery topics              |
 
