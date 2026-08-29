@@ -127,7 +127,12 @@ void loop() {
 
   publishTicker.update(); // Call publishReading() when the ticker fires
 
-  if (millis() - lastSuccessfulPublish > MQTT_LIVENESS_TIMEOUT_MS) {
+  // Liveness watchdog: bound tracks whichever interval is currently in effect,
+  // so a stalled connection is caught in ~2 min while charging instead of up
+  // to 11 min if the fixed idle-sized bound were used year-round.
+  unsigned long livenessTimeout =
+      (reportActive ? ACTIVE_INTERVAL_MS : IDLE_INTERVAL_MS) + LIVENESS_MARGIN_MS;
+  if (millis() - lastSuccessfulPublish > livenessTimeout) {
     WiFi.disconnect(); // Force a reconnect sequence if MQTT has stalled
     wifiConnect();
   }

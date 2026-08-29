@@ -17,14 +17,14 @@
  * see the Calibration section for the bench procedure.
  *
  * @author Karl Berger with Claude
- * @date 2026.08.06
+ * @date 2026.08.29
  */
 
 #pragma once
 
 #include "secrets.h" // WIFI_SSID, WIFI_PASS, MQTT_HOST, MQTT_USER, MQTT_PASS, OTA_PASSWORD
 
-static const char *FW_VERSION = "1.4.0"; // bump on each release
+static const char *FW_VERSION = "1.4.2"; // bump on each release
 // 1.0.0 2026.07.06 initial commit
 // 1.0.1 2026.07.06 minor cleanup
 // 1.0.2 2026.07.07 rescaled CURRENT_SCALE due to error in CT turns
@@ -40,6 +40,7 @@ static const char *FW_VERSION = "1.4.0"; // bump on each release
 // 1.3.4 2026.08.21 add firmware version to MQTT discovery and telemetry, reduce SAMPLE_CYCLES to 15
 // 1.4.0 2026.08.27 update parameters for new hardware build
 // 1.4.1 2026.08.29 add active hold to avoid rapid state changes when load current is near threshold
+// 1.4.2 2026.09.01 add liveness watchdog to detect stalled MQTT connection and force reconnect
 
 // ─── Wi-Fi Timeout ──────────────────────────────────────────────────────────
 static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000; // 15 s WiFi connect timeout
@@ -66,9 +67,10 @@ static constexpr float LOAD_THRESHOLD_A = 1.0f;                      // amps —
 static constexpr unsigned long IDLE_INTERVAL_MS = 10UL * 60 * 1000;  // 10 min when I < threshold
 static constexpr unsigned long ACTIVE_INTERVAL_MS = 1UL * 60 * 1000; // 60 sec when I >= threshold
 static constexpr unsigned long ACTIVE_HOLD_MS = IDLE_INTERVAL_MS;    // hold >= one idle-interval since last activity
-// MQTT_LIVENESS_TIMEOUT_MS must exceed the longest gap between publishes (idle
-// interval), plus a safety margin
-static constexpr unsigned long MQTT_LIVENESS_TIMEOUT_MS = IDLE_INTERVAL_MS + 60UL * 1000;
+// Liveness timeout now tracks whichever publish interval is currently active,
+// plus a safety margin — a fixed worst-case (idle-sized) timeout would leave a
+// stalled MQTT connection undetected for up to 11 minutes during active charging.
+static constexpr unsigned long LIVENESS_MARGIN_MS = 60UL * 1000;
 static constexpr float CURRENT_DEADBAND_A = 0.1f; // treat current & power as zero to mask noise
 
 // ─── Device Connections ─────────────────────────────────────────────────────
