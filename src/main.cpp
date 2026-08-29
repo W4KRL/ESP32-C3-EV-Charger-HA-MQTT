@@ -36,7 +36,7 @@
  *    via updateBicolorLed().
  *
  * @author Karl Berger with Claude
- * @date 2026.08.21
+ * @date 2026.08.29
  */
 
 // ─── Libraries ──────────────────────────────────────────────────────────────
@@ -85,8 +85,8 @@ void loop() {
   measure();          // Sample continuously
   if (millis() - lastCalMs >= CAL_INTERVAL_MS) {
     lastCalMs = millis();
-    Serial.printf("vrms_mv=%.2f irms_mv=%.2f vrms=%.2f irms=%.2f\n", vrms_mv,
-                  irms_mv, reading.vrms, reading.irms);
+    Serial.printf("vrms_mv=%.2f vrms=%.2f irms_mv=%.2f irms=%.2f\n", vrms_mv, reading.vrms,
+                  irms_mv, reading.irms);
   }
   return; // Skip Wi-Fi/MQTT entirely during calibration
 #endif
@@ -103,15 +103,26 @@ void loop() {
   bool isActive = (reading.irms >= LOAD_THRESHOLD_A); // True when load current indicates charging
   setBicolorLedState(isActive ? LED_GREEN_SLOW : LED_GREEN_STEADY);
 
+  static unsigned long lastActiveMillis = 0;
+  static bool hadActivity = false;
+  if (isActive) {
+    lastActiveMillis = millis(); // refresh the hold on every sighting of real current
+    hadActivity = true;
+  }
+  // Stay in the active reporting state through a finish-charge taper: hold for at
+  // least one full idle interval since the last time current actually crossed threshold.
+  bool reportActive =
+      isActive || (hadActivity && (millis() - lastActiveMillis < ACTIVE_HOLD_MS));
+
   static bool wasActive = false;
-  if (isActive != wasActive) {
+  if (reportActive != wasActive) {
     unsigned long newInterval =
-        isActive ? ACTIVE_INTERVAL_MS : IDLE_INTERVAL_MS;
+        reportActive ? ACTIVE_INTERVAL_MS : IDLE_INTERVAL_MS;
     publishTicker.interval(newInterval); // Switch to the interval for the new state
     publishTicker.stop();                // Reset ticker timing on state change
     publishTicker.start();               // Restart with the new interval
     publishReading();                    // Publish immediately on the transition
-    wasActive = isActive;                // Remember state for next comparison
+    wasActive = reportActive;            // Remember state for next comparison
   }
 
   publishTicker.update(); // Call publishReading() when the ticker fires

@@ -39,6 +39,7 @@ static const char *FW_VERSION = "1.4.0"; // bump on each release
 // 1.3.3 2026.08.02 add double call to measure() in setup() to prime offsetV/offsetI before first valid reading
 // 1.3.4 2026.08.21 add firmware version to MQTT discovery and telemetry, reduce SAMPLE_CYCLES to 15
 // 1.4.0 2026.08.27 update parameters for new hardware build
+// 1.4.1 2026.08.29 add active hold to avoid rapid state changes when load current is near threshold
 
 // ─── Wi-Fi Timeout ──────────────────────────────────────────────────────────
 static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000; // 15 s WiFi connect timeout
@@ -64,6 +65,7 @@ static constexpr int SAMPLE_INTERVAL_US = 400; // microseconds between ADC sampl
 static constexpr float LOAD_THRESHOLD_A = 1.0f;                      // amps — switches report interval
 static constexpr unsigned long IDLE_INTERVAL_MS = 10UL * 60 * 1000;  // 10 min when I < threshold
 static constexpr unsigned long ACTIVE_INTERVAL_MS = 1UL * 60 * 1000; // 60 sec when I >= threshold
+static constexpr unsigned long ACTIVE_HOLD_MS = IDLE_INTERVAL_MS;    // hold >= one idle-interval since last activity
 // MQTT_LIVENESS_TIMEOUT_MS must exceed the longest gap between publishes (idle
 // interval), plus a safety margin
 static constexpr unsigned long MQTT_LIVENESS_TIMEOUT_MS = IDLE_INTERVAL_MS + 60UL * 1000;
@@ -76,11 +78,11 @@ static constexpr int PIN_LED_RED = 0;   // GPIO5 bicolor LED red anode
 static constexpr int PIN_LED_GREEN = 1; // GPIO6 bicolor LED green anode
 
 // ─── Calibration ────────────────────────────────────────────────────────────
-//  #define CALIBRATE  // uncomment for calibration
+// #define CALIBRATE // uncomment for calibration
 //
 // NOTE: Use CALIBRATE only on a bench top with USB connection to the PC.
 //
-const unsigned long CAL_INTERVAL_MS = 10 * 1000; // interval between calibration output
+const unsigned long CAL_INTERVAL_MS = 2 * 1000;  // interval between calibration output
 static constexpr float VOLTAGE_SCALE = 1.0f;     // ← MUST calibrate before use
 static constexpr float CURRENT_SCALE = 0.02257f; // ← MUST calibrate before use
 // analogReadMilliVolts() returns calibrated mV (150–2450 mV at ADC_11db).

@@ -39,7 +39,7 @@ Apeak = $\sqrt(2)$ $\cdot$ 16 Arms = 22.6 A = ~ 23 A
 
 Select a burden resistor to develop 1.0 V at 23 A:  
 Rb = 1.0 V / 23 A = 43.5 Ohms
-<br>
+
 A standard value of 39 Ohms may be used, however, two parallel resistors may achieve a higher accuracy:  
 Rb = 68 || 120 = 43.4 Ohms
 
