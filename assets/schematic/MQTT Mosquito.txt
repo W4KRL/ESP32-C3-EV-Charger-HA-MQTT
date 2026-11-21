@@ -1,0 +1,6 @@
+
+MQTT mqttclient
+
+Username: mqttclient
+Password: f1a78ebe2b0052eea0111a4afae4a551
+
