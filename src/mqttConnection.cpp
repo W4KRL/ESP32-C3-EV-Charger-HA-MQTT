@@ -9,12 +9,13 @@
  * Home Assistant MQTT discovery registration for all sensor entities.
  *
  * @author Karl Berger with Claude
- * @date 2026.08.21
+ * @date 2026.11.20
  */
 
 #include "mqttConnection.h" // Self-header
 #include "alertFlash.h"     // Bicolor LED status and alert patterns
 #include "config.h"         // Credentials and parameters
+#include <Arduino.h>        // temperatureRead()
 #include <ArduinoJson.h>    // JSON library
 #include <WiFi.h>           // Wi-Fi library
 
@@ -66,6 +67,12 @@ void publishReading() {
   doc["rssi"] = WiFi.RSSI();
   doc["bssid"] = WiFi.BSSIDstr();
   doc["fw"] = FW_VERSION;
+  // ESP32-C3 internal die temperature (deg C). Read here, once per publish,
+  // and never inside the measure() burst, so it cannot disturb ADC sample
+  // timing. This is die temperature, not ambient: it runs several degrees
+  // above the enclosure air due to Wi-Fi self-heating, and its absolute
+  // offset varies chip to chip. Use it for trends/correlation only.
+  doc["chip_temp"] = serialized(String(temperatureRead(), 1));
 
   char buf[256];
   serializeJson(doc, buf, sizeof(buf));
@@ -102,6 +109,7 @@ static const SensorDef sensors[] = {
   { "RSSI",              "rssi", "dBm", "signal_strength", nullptr,                    "diagnostic",  "measurement", false },
   { "WiFi BSSID",       "bssid", "",    nullptr,           "mdi:access-point-network", "diagnostic",   nullptr,      false },
   { "Firmware",         "fw",    "",    nullptr,           "mdi:chip",                 "diagnostic",   nullptr,      false },
+  { "Chip Temperature", "chip_temp", "°C", "temperature",  nullptr,                    "diagnostic",  "measurement", false },
 };
   // clang-format on
 
