@@ -17,14 +17,14 @@
  * see the Calibration section for the bench procedure.
  *
  * @author Karl Berger with Claude
- * @date 2026.08.29
+ * @date 2026.11.20
  */
 
 #pragma once
 
 #include "secrets.h" // WIFI_SSID, WIFI_PASS, MQTT_HOST, MQTT_USER, MQTT_PASS, OTA_PASSWORD
 
-static const char *FW_VERSION = "1.4.2"; // bump on each release
+static const char *FW_VERSION = "1.5.0"; // bump on each release
 // 1.0.0 2026.07.06 initial commit
 // 1.0.1 2026.07.06 minor cleanup
 // 1.0.2 2026.07.07 rescaled CURRENT_SCALE due to error in CT turns
@@ -41,6 +41,7 @@ static const char *FW_VERSION = "1.4.2"; // bump on each release
 // 1.4.0 2026.08.27 update parameters for new hardware build
 // 1.4.1 2026.08.29 add active hold to avoid rapid state changes when load current is near threshold
 // 1.4.2 2026.09.01 add liveness watchdog to detect stalled MQTT connection and force reconnect
+// 1.5.0 2026.11.20 add ESP32-C3 die temperature as diagnostic entity and to CALIBRATE output
 
 // ─── Wi-Fi Timeout ──────────────────────────────────────────────────────────
 static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000; // 15 s WiFi connect timeout
