@@ -36,7 +36,7 @@
  *    via updateBicolorLed().
  *
  * @author Karl Berger with Claude
- * @date 2026.08.29
+ * @date 2026.11.20
  */
 
 // ─── Libraries ──────────────────────────────────────────────────────────────
@@ -85,8 +85,10 @@ void loop() {
   measure();          // Sample continuously
   if (millis() - lastCalMs >= CAL_INTERVAL_MS) {
     lastCalMs = millis();
-    Serial.printf("vrms_mv=%.2f vrms=%.2f irms_mv=%.2f irms=%.2f\n", vrms_mv, reading.vrms,
-                  irms_mv, reading.irms);
+    // chip_c added so a held-voltage bench test can log vrms_mv against
+    // temperature; read between bursts, never inside measure().
+    Serial.printf("vrms_mv=%.2f vrms=%.2f irms_mv=%.2f irms=%.2f chip_c=%.1f\n", vrms_mv,
+                  reading.vrms, irms_mv, reading.irms, temperatureRead());
   }
   return; // Skip Wi-Fi/MQTT entirely during calibration
 #endif
