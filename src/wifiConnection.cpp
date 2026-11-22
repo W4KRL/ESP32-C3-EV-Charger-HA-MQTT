@@ -8,15 +8,16 @@
  * hostname and password. OTA status is sent to serial during updates.
  *
  * @author Karl Berger with Claude
- * @date 2026.07.14
+ * @date 2026.11.22
  */
 
-#include "wifiConnection.h"  // Self header
-#include "config.h"          // Credentials
-#include <WiFi.h>            // Wi-Fi library
-#include <esp_wifi.h>        // For esp_wifi_get_config/set_config (AP scan/sort settings)
-#include <ArduinoOTA.h>      // OTA library
-#include "alertFlash.h"      // Mode indications
+#include "wifiConnection.h" // Self header
+#include "alertFlash.h"     // Mode indications
+#include "config.h"         // Credentials
+#include <ArduinoOTA.h>     // OTA library
+#include <WiFi.h>           // Wi-Fi library
+#include <esp_wifi.h>       // For esp_wifi_get_config/set_config (AP scan/sort settings)
+
 
 /**
  * @brief Connect to WiFi with a full channel scan on every connection.
@@ -24,12 +25,19 @@
  * @warning Blocking. Caller must decide retry/reboot behavior on failure.
  */
 bool wifiConnect() {
-  setBicolorLedState(LED_GREEN_FAST);  // fast green = attempting to connect
+  setBicolorLedState(LED_GREEN_FAST); // fast green = attempting to connect
 
-  WiFi.mode(WIFI_STA);   // set station mode (client, not AP or dual mode)
-  WiFi.setSleep(false);  // keep the radio active to maintain a stable network connection
-                         // (disables WiFi modem-sleep power saving, which can cause
-                         // choppy/laggy connections on ESP32)
+  // DHCP hostname shown in the router's client list. Must be set before
+  // WiFi.mode() starts the station interface, or the default
+  // "esp32c3-XXXXXX" name is sent. Reuses OTA_HOSTNAME so the router name,
+  // mDNS name, and OTA name all match. Hyphens, not underscores: DHCP
+  // hostnames allow only letters, digits, and hyphens (RFC 1123).
+  WiFi.setHostname(OTA_HOSTNAME);
+
+  WiFi.mode(WIFI_STA);  // set station mode (client, not AP or dual mode)
+  WiFi.setSleep(false); // keep the radio active to maintain a stable network connection
+                        // (disables WiFi modem-sleep power saving, which can cause
+                        // choppy/laggy connections on ESP32)
 
   // Set SSID/password without connecting yet, so our scan/sort override
   // below isn't clobbered by WiFi.begin()'s own internal config write
@@ -37,32 +45,32 @@ bool wifiConnect() {
 
   // Force a full-channel scan and RSSI-based AP selection so OneMesh
   // picks the strongest AP sharing the SSID, not just the first to answer
-  wifi_config_t conf;                                // Low-level ESP-IDF config struct
-  esp_wifi_get_config(WIFI_IF_STA, &conf);           // Read back what WiFi.begin() just wrote
-  conf.sta.scan_method = WIFI_ALL_CHANNEL_SCAN;      // Scan every channel instead of stopping at first match
-  conf.sta.sort_method = WIFI_CONNECT_AP_BY_SIGNAL;  // Rank candidates by RSSI, strongest first
-  esp_wifi_set_config(WIFI_IF_STA, &conf);           // Write the modified config back
+  wifi_config_t conf;                               // Low-level ESP-IDF config struct
+  esp_wifi_get_config(WIFI_IF_STA, &conf);          // Read back what WiFi.begin() just wrote
+  conf.sta.scan_method = WIFI_ALL_CHANNEL_SCAN;     // Scan every channel instead of stopping at first match
+  conf.sta.sort_method = WIFI_CONNECT_AP_BY_SIGNAL; // Rank candidates by RSSI, strongest first
+  esp_wifi_set_config(WIFI_IF_STA, &conf);          // Write the modified config back
 
-  esp_wifi_connect();  // now actually connect, with our scan/sort settings intact
+  esp_wifi_connect(); // now actually connect, with our scan/sort settings intact
   Serial.print("WiFi connecting");
 
-  unsigned long startAttempt = millis();  // mark the start of the connection attempt
+  unsigned long startAttempt = millis(); // mark the start of the connection attempt
   while (WiFi.status() != WL_CONNECTED) {
     // Bail out if we've been trying too long
     if (millis() - startAttempt >= WIFI_CONNECT_TIMEOUT_MS) {
-      setBicolorLedState(LED_RED_FAST);  // fast red = connection failure
+      setBicolorLedState(LED_RED_FAST); // fast red = connection failure
       Serial.println("\nWiFi connect timed out");
       return false;
     }
-    updateBicolorLed();  // keep flash alive during blocking wait
-    delay(500);          // brief pause between status checks
-    Serial.print(".");   // simple progress indicator on Serial Monitor
+    updateBicolorLed(); // keep flash alive during blocking wait
+    delay(500);         // brief pause between status checks
+    Serial.print(".");  // simple progress indicator on Serial Monitor
   }
 
   // WL_CONNECTED reached — print the assigned IP and report success
   Serial.printf("\nConnected — IP: %s\n", WiFi.localIP().toString().c_str());
   return true;
-}  // wifiConnect()
+} // wifiConnect()
 
 void initOTA() {
   ArduinoOTA.setHostname(OTA_HOSTNAME);
@@ -83,4 +91,4 @@ void initOTA() {
 
   ArduinoOTA.begin();
   Serial.println("OTA ready");
-}  // initOTA()
+} // initOTA()
