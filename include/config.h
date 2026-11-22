@@ -17,7 +17,7 @@
  * see the Calibration section for the bench procedure.
  *
  * @author Karl Berger with Claude
- * @date 2026.11.20
+ * @date 2026.11.22
  */
 
 #pragma once
@@ -41,7 +41,8 @@ static const char *FW_VERSION = "1.5.0"; // bump on each release
 // 1.4.0 2026.08.27 update parameters for new hardware build
 // 1.4.1 2026.08.29 add active hold to avoid rapid state changes when load current is near threshold
 // 1.4.2 2026.09.01 add liveness watchdog to detect stalled MQTT connection and force reconnect
-// 1.5.0 2026.11.20 add ESP32-C3 die temperature as diagnostic entity and to CALIBRATE output
+// 1.5.0 2026.11.22 add ESP32-C3 die temperature as diagnostic entity and to CALIBRATE output,
+//                  set DHCP hostname to OTA_HOSTNAME (ac-monitor-01)
 
 // ─── Wi-Fi Timeout ──────────────────────────────────────────────────────────
 static constexpr unsigned long WIFI_CONNECT_TIMEOUT_MS = 15000; // 15 s WiFi connect timeout
